@@ -1,6 +1,8 @@
 buildscript {
     repositories {
         // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
     }
@@ -13,6 +15,9 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.38'
+    id 'me.modmuss50.mod-publish-plugin' version '0.4.5'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
 apply plugin: 'org.spongepowered.mixin'
@@ -65,7 +70,7 @@ minecraft {
     // However, it must be at "META-INF/accesstransformer.cfg" in the final mod jar to be loaded by Forge.
     // This default location is a best practice to automatically put the file in the right place in the final jar.
     // See https://docs.minecraftforge.net/en/latest/advanced/accesstransformers/ for more information.
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
@@ -131,9 +136,20 @@ mixin {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    // Put repositories for dependencies here
-    // ForgeGradle automatically adds the Forge maven and Maven Central for you
-
+    maven {
+        // Create, Ponder, Flywheel
+        url = "https://maven.createmod.net"
+    }
+    maven {
+        // location of the maven that hosts JEI files since January 2023
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html#sub:flat_dir_resolver
     // flatDir {
@@ -142,25 +158,34 @@ repositories {
 }
 
 dependencies {
-    // Specify the version of Minecraft to use.
-    // Any artifact can be supplied so long as it has a "userdev" classifier artifact and is a compatible patcher artifact.
-    // The "userdev" classifier will be requested and setup by ForgeGradle.
-    // If the group id is "net.minecraft" and the artifact id is one of ["client", "server", "joined"],
-    // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
+    // 指定要使用的 Minecraft 版本。
+    // 只要有 "userdev" 分类器 artifact 并且是兼容的 patcher artifact，任何 artifact 都可以使用。
+    // "userdev" 分类器会被 ForgeGradle 请求并设置。
+    // 如果 group id 是 "net.minecraft" 且 artifact id 是 ["client", "server", "joined"] 之一，
+    // 则会进行特殊处理，允许设置原版依赖而无需使用外部仓库。
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    implementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    implementation("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
+    compileOnly("dev.engine-room.flywheel:flywheel-forge-api-${flywheel_minecraft_version}:${flywheel_version}")
+    runtimeOnly("dev.engine-room.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
+    implementation("com.tterrag.registrate:Registrate:${registrate_version}")
 
-    // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
-    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
+    compileOnly("mezz.jei:jei-${jei_minecraft_version}-common-api:${jei_version}")
+    compileOnly("mezz.jei:jei-${jei_minecraft_version}-forge-api:${jei_version}")
+    runtimeOnly("mezz.jei:jei-${jei_minecraft_version}-forge:${jei_version}")
+
+    // JEI 示例 mod 依赖 —— 使用 fg.deobf() 可确保依赖被 remap 到你的开发映射
+    // JEI API 仅在编译时使用，完整 JEI artifact 在运行时使用
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
 
-    // Example mod dependency using a mod jar from ./libs with a flat dir repository
-    // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
-    // The group id is ignored when searching -- in this case, it is "blank"
+    // 使用 ./libs 下 mod jar 的示例依赖，配合 flat dir 仓库
+    // 这会映射到 ./libs/coolmod-${mc_version}-${coolmod_version}.jar
+    // 搜索时 group id 会被忽略 —— 此处为 "blank"
     // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
 
-    // For more info:
+    // 更多信息：
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
