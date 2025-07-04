@@ -26,12 +26,12 @@ license = "${mod_license}"
 [[dependencies."${mod_id}"]]
     modId="create"
     mandatory=true
-    versionRange="[6.0.0,)"
-    ordering="AFTER"
+    versionRange="[6.0.6,6.1.0)"
+    ordering="NONE"
     side="BOTH"
 
 [[mixins]]
-config="create_freight.mixins.json"
+    config="create_freight.mixins.json"
 
 [[accessTransformers]]
-file="META-INF/accesstransformer.cfg"
+    file="META-INF/accesstransformer.cfg"

@@ -14,10 +14,10 @@ buildscript {
 plugins {
     id 'eclipse'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
-    id 'org.spongepowered.mixin' version '0.7.38'
-    id 'me.modmuss50.mod-publish-plugin' version '0.4.5'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'       // Forge开发核心
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'    // Parchment映射支持
+    id 'org.spongepowered.mixin' version '0.7.38'               // Mixin支持
+    id 'me.modmuss50.mod-publish-plugin' version '0.4.5'        // 自动发布支持
 }
 
 apply plugin: 'org.spongepowered.mixin'
@@ -26,111 +26,102 @@ group = mod_group_id
 version = mod_version
 
 base {
+    // 设置输出的.jar文件主名
     archivesName = mod_id
 }
 
+mixin {
+    // MixinGradle Settings
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "create_freight.mixins.json"
+}
+
 java {
+    // 指定使用Java 17编译
     toolchain.languageVersion = JavaLanguageVersion.of(17)
 }
 
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
 minecraft {
-    // The mappings can be changed at any time and must be in the following format.
-    // Channel:   Version:
-    // official   MCVersion             Official field/method names from Mojang mapping files
-    // parchment  YYYY.MM.DD-MCVersion  Open community-sourced parameter names and javadocs layered on top of official
-    //
-    // You must be aware of the Mojang license when using the 'official' or 'parchment' mappings.
-    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
-    //
-    // Parchment is an unofficial project maintained by ParchmentMC, separate from MinecraftForge
-    // Additional setup is needed to use their mappings: https://parchmentmc.org/docs/getting-started
-    //
-    // Use non-default mappings at your own risk. They may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
+    // Minecraft source mapping
     mappings channel: mapping_channel, version: mapping_version
 
-    // When true, this property will have all Eclipse/IntelliJ IDEA run configurations run the "prepareX" task for the given run configuration before launching the game.
-    // In most cases, it is not necessary to enable.
-    // enableEclipsePrepareRuns = true
-    // enableIdeaPrepareRuns = true
-
-    // This property allows configuring Gradle's ProcessResources task(s) to run on IDE output locations before launching the game.
-    // It is REQUIRED to be set to true for this template to function.
-    // See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
+    // Run Gradle's ProcessResources task(s) on IDE output locations before launching the game. REQUIRED
     copyIdeResources = true
 
-    // When true, this property will add the folder name of all declared run configurations to generated IDE run configurations.
-    // The folder name can be set on a run configuration using the "folderName" property.
-    // By default, the folder name of a run configuration is the name of the Gradle project containing it.
-    // generateRunFolders = true
-
-    // This property enables access transformers for use in development.
-    // They will be applied to the Minecraft artifact.
-    // The access transformer file can be anywhere in the project.
-    // However, it must be at "META-INF/accesstransformer.cfg" in the final mod jar to be loaded by Forge.
-    // This default location is a best practice to automatically put the file in the right place in the final jar.
-    // See https://docs.minecraftforge.net/en/latest/advanced/accesstransformers/ for more information.
+    // Enable access transformers for use in development.
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
     runs {
-        // applies to all the run configs below
-        configureEach {
+
+        client {
             workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property("mixin.env.remapRefMap", "true")
+            property("mixin.env.refMapRemappingFile", "${projectDir}/build/createSrgToMcp/output.srg")
+/*            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'create_freight'
+            arg '-mixin.config=create_freight.mixins.json'
 
             mods {
-                "${mod_id}" {
+                create_freight {
+                    source sourceSets.main
+                }
+            }*/
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'create_freight'
+            arg '-mixin.config=create_freight.mixins.json'
+
+            mods {
+                create_freight {
                     source sourceSets.main
                 }
             }
         }
 
-        client {
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
-        }
-
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'create_freight'
+            arg '-mixin.config=create_freight.mixins.json'
+
+            mods {
+                create_freight {
+                    source sourceSets.main
+                }
+            }
         }
 
         data {
-            // example of overriding the workingDirectory set in configureEach above
-            workingDirectory project.file('run-data')
+            workingDirectory project.file('run')
 
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            arg '-mixin.config=create_freight.mixins.json'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'create_freight', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                create_freight {
+                    source sourceSets.main
+                }
+            }
         }
     }
 }
 
-mixin {
-    add sourceSets.main, "${mod_id}.refmap.json"
-
-    config "${mod_id}.mixins.json"
-}
 
 // Include resources generated by data generators.
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -150,48 +141,45 @@ repositories {
         name = "ModMaven"
         url = "https://modmaven.dev"
     }
-    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html#sub:flat_dir_resolver
-    // flatDir {
-    //     dir 'libs'
-    // }
+    maven {
+        // Conditional Mixin
+        name = "ConditionalMixin"
+        url 'https://maven.fallenbreath.me/releases'
+    }
+    maven {
+        // Registrate
+        url = "https://maven.ithundxr.dev/mirror"
+    }
+    maven {
+        // ForgeConfigAPIPort
+        url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+    }
+
+    // Mod jar dependencies in ./libs
+     flatDir {
+         dir 'libs'
+     }
 }
 
 dependencies {
-    // 指定要使用的 Minecraft 版本。
-    // 只要有 "userdev" 分类器 artifact 并且是兼容的 patcher artifact，任何 artifact 都可以使用。
-    // "userdev" 分类器会被 ForgeGradle 请求并设置。
-    // 如果 group id 是 "net.minecraft" 且 artifact id 是 ["client", "server", "joined"] 之一，
-    // 则会进行特殊处理，允许设置原版依赖而无需使用外部仓库。
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    implementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
-    implementation("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
-    compileOnly("dev.engine-room.flywheel:flywheel-forge-api-${flywheel_minecraft_version}:${flywheel_version}")
-    runtimeOnly("dev.engine-room.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
-    implementation("com.tterrag.registrate:Registrate:${registrate_version}")
 
-    compileOnly("mezz.jei:jei-${jei_minecraft_version}-common-api:${jei_version}")
-    compileOnly("mezz.jei:jei-${jei_minecraft_version}-forge-api:${jei_version}")
-    runtimeOnly("mezz.jei:jei-${jei_minecraft_version}-forge:${jei_version}")
+    implementation(fg.deobf("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false })
+    implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}"))
+    compileOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}"))
+    runtimeOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}"))
+    implementation(fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}"))
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    implementation("io.github.llamalad7:mixinextras-forge:0.4.1")
 
-    // JEI 示例 mod 依赖 —— 使用 fg.deobf() 可确保依赖被 remap 到你的开发映射
-    // JEI API 仅在编译时使用，完整 JEI artifact 在运行时使用
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
-    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
-
-    // 使用 ./libs 下 mod jar 的示例依赖，配合 flat dir 仓库
-    // 这会映射到 ./libs/coolmod-${mc_version}-${coolmod_version}.jar
-    // 搜索时 group id 会被忽略 —— 此处为 "blank"
-    // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
-
-    // 更多信息：
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 }
+
 
 // This block of code expands all declared replace properties in the specified resource targets.
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
@@ -211,7 +199,7 @@ tasks.named('processResources', ProcessResources).configure {
     }
 }
 
-// Example for how to get properties into the manifest for reading at runtime.
+// How to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
     manifest {
         attributes(["Specification-Title"     : mod_id,
@@ -220,7 +208,8 @@ tasks.named('jar', Jar).configure {
                     "Implementation-Title"    : project.name,
                     "Implementation-Version"  : project.jar.archiveVersion,
                     "Implementation-Vendor"   : mod_authors,
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")])
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                    "MixinConfigs"            : "create_freight.mixins.json"])
     }
 
     // This is the preferred method to reobfuscate your jar file
