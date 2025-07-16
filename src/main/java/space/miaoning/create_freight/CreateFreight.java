@@ -7,9 +7,7 @@ import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -29,10 +27,11 @@ public class CreateFreight {
     static {
         REGISTRATE
                 .setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
-                .andThen(TooltipModifier.mapNull(KineticStats.create(item))));
+                        .andThen(TooltipModifier.mapNull(KineticStats.create(item))));
     }
 
 
+    @SuppressWarnings("removal")
     public CreateFreight() {
         modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         REGISTRATE.registerEventListeners(modEventBus);
@@ -43,6 +42,7 @@ public class CreateFreight {
         //注册创造物品栏
         REGISTRATE.setCreativeTab(CFCreativeTabs.MAIN);
         CFBlocks.register();
+        CFBlockEntityTypes.register();
         CFCreativeTabs.register(modEventBus);
 
 /*        // 注册配置文件
