@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "create_freight.refmap.json",
   "mixins": [
+    "ChunkAccessMixin"
   ],
   "client": [
   ],

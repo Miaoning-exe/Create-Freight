@@ -45,12 +45,8 @@ public class CreateFreight {
         CFBlockEntityTypes.register();
         CFCreativeTabs.register(modEventBus);
 
-/*        // 注册配置文件
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);*/
     }
 
-    //这个事件在所有 Mod 的方块、物品等内容都注册完毕后触发。
-    //在这里注册behaviors
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
 
