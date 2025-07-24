@@ -14,7 +14,6 @@ import space.miaoning.create_freight.event.StructureGeneratedEvent;
 
 @Mixin(ChunkAccess.class)
 public class ChunkAccessMixin {
-
     @Inject(
             method = "setStartForStructure(Lnet/minecraft/world/level/levelgen/structure/Structure;Lnet/minecraft/world/level/levelgen/structure/StructureStart;)V",
             at = @At("HEAD")
