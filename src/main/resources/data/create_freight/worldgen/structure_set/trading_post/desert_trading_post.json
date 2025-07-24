@@ -1,0 +1,14 @@
+{
+    "structures": [
+        {
+            "structure": "create_freight:trading_post/desert_trading_post",
+            "weight": 1
+        }
+    ],
+    "placement": {
+        "type": "minecraft:random_spread",
+        "salt": 19582024,
+        "spacing": 24,
+        "separation": 12
+    }
+}
