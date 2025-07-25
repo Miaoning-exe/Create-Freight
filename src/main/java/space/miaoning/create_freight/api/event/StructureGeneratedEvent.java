@@ -1,12 +1,9 @@
-package space.miaoning.create_freight.event;
+package space.miaoning.create_freight.api.event;
 
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraftforge.eventbus.api.Event;
 
 /**
@@ -15,12 +12,10 @@ import net.minecraftforge.eventbus.api.Event;
  */
 public class StructureGeneratedEvent extends Event {
     private final StructureStart structureStart;
-    private final ServerLevel level;
     private final ChunkAccess chunk;
 
-    public StructureGeneratedEvent(StructureStart structureStart, ServerLevel level, ChunkAccess chunk) {
+    public StructureGeneratedEvent(StructureStart structureStart, ChunkAccess chunk) {
         this.structureStart = structureStart;
-        this.level = level;
         this.chunk = chunk;
     }
 
@@ -30,10 +25,6 @@ public class StructureGeneratedEvent extends Event {
 
     public Structure getStructure() {
         return structureStart.getStructure();
-    }
-
-    public ServerLevel getLevel() {
-        return level;
     }
 
     public ChunkAccess getChunk() {

@@ -16,7 +16,7 @@ plugins {
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'       // Forge开发核心
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'    // Parchment映射支持
-    id 'org.spongepowered.mixin' version '0.7.38'               // Mixin支持
+    id 'org.spongepowered.mixin' version '0.7.+'               // Mixin支持
     id 'me.modmuss50.mod-publish-plugin' version '0.4.5'        // 自动发布支持
 }
 
@@ -32,12 +32,13 @@ base {
 
 mixin {
     // MixinGradle Settings
-    add sourceSets.main, "${mod_id}.refmap.json"
+    add sourceSets.main, "create_freight.refmap.json"
     config "create_freight.mixins.json"
+
+    debug.export = true
 }
 
 java {
-    // 指定使用Java 17编译
     toolchain.languageVersion = JavaLanguageVersion.of(17)
 }
 

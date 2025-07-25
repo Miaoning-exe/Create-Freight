@@ -64,6 +64,7 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
     private InventorySummary paymentEntries;
     private PackageOrder order;
     private ItemStack lastFilterItem = ItemStack.EMPTY;
+    private UUID structureChannelId;
 
     private BlockPos stockTickerPos = null;
 
@@ -93,6 +94,10 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
     public void onLoad() {
         super.onLoad();
         lazyItemHandler = LazyOptional.of(() -> itemHandler);
+
+        if (level != null && !level.isClientSide() && structureChannelId != null) {
+            LOGGER.debug("Automatic Trader at {} loaded with structure channel ID: {}", getBlockPos(), structureChannelId);
+        }
     }
 
     @Override
@@ -105,12 +110,20 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
     protected void write(CompoundTag tag, boolean clientPacket) {
         tag.put("inventory", itemHandler.serializeNBT());
         super.write(tag, clientPacket);
+
+        if (structureChannelId != null) {
+            tag.putUUID("StructureChannelId", structureChannelId);
+        }
     }
 
     @Override
     protected void read(CompoundTag tag, boolean clientPacket) {
         super.read(tag, clientPacket);
         itemHandler.deserializeNBT(tag.getCompound("inventory"));
+
+        if (tag.hasUUID("StructureChannelId")) {
+            structureChannelId = tag.getUUID("StructureChannelId");
+        }
     }
 
     @Override
@@ -331,6 +344,11 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
             }
         }
         return address;
+    }
+
+    public void setStructureChannelId(UUID channelId) {
+        this.structureChannelId = channelId;
+        setChanged();
     }
 
     @Override

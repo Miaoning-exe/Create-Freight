@@ -6,12 +6,13 @@ import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
+import space.miaoning.create_freight.api.event.ModEvents;
 
 @Mod(CreateFreight.MODID)
 public class CreateFreight {
@@ -33,7 +34,8 @@ public class CreateFreight {
 
     @SuppressWarnings("removal")
     public CreateFreight() {
-        modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        MinecraftForge.EVENT_BUS.register(new ModEvents());
         REGISTRATE.registerEventListeners(modEventBus);
 
         // Register the commonSetup method for mod loading
@@ -56,9 +58,4 @@ public class CreateFreight {
     public static CreateRegistrate getRegistrate() {
         return REGISTRATE;
     }
-
-    public static ResourceLocation asResource(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MODID, path);
-    }
-
 }
