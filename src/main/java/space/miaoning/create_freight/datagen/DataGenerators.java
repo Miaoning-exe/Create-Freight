@@ -11,7 +11,6 @@ import space.miaoning.create_freight.CreateFreight;
 import space.miaoning.create_freight.datagen.recipe.Recipes;
 
 import java.util.concurrent.CompletableFuture;
-//import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = CreateFreight.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DataGenerators {
@@ -25,5 +24,6 @@ public class DataGenerators {
         generator.addProvider(event.includeServer(), new Recipes(output));
 
         //generator.addProvider(event.includeClient(), new GenBlockStates(output,helper));
+        //generator.addProvider(event.includeClient(), new GenItemModels(output,helper));
     }
 }
