@@ -19,10 +19,10 @@ public class CFBlocks {
             .simpleItem()
             .register();
 
-    public static final BlockEntry<Block> CARGO_STATION = REGISTRATE.block("cargo_station", Block::new)
-            .initialProperties(SharedProperties::stone)
-            .simpleItem()
-            .register();
+//    public static final BlockEntry<Block> CARGO_STATION = REGISTRATE.block("cargo_station", Block::new)
+//            .initialProperties(SharedProperties::stone)
+//            .simpleItem()
+//            .register();
 
     public static final BlockEntry<ServerStoreBlock> SERVER_STORE = REGISTRATE
             .block("server_store", ServerStoreBlock::new)

@@ -41,10 +41,12 @@ public class ChunkGeneratorMixin {
                                         SectionPos pSectionPos,
                                         @NotNull CallbackInfoReturnable<Boolean> cir,
                                         @Local StructureStart structurestart) {
-        create_freight$LOGGER.info("<<<<< MIXIN INJECTION SUCCESSFUL! >>>>>");
+//        create_freight$LOGGER.info("<<<<< MIXIN INJECTION SUCCESSFUL! >>>>>");
+
         if (!cir.getReturnValue()) {
             return;
         }
+
         StructureGeneratedEvent event = new StructureGeneratedEvent(structurestart, pChunk);
         MinecraftForge.EVENT_BUS.post(event);
 

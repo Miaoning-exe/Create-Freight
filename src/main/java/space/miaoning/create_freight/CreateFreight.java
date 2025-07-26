@@ -18,13 +18,11 @@ import space.miaoning.create_freight.recipe.CFRecipeTypes;
 
 @Mod(CreateFreight.MODID)
 public class CreateFreight {
-
     // Define mod id in a common place for everything to reference
     public static final String MODID = "create_freight";
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static IEventBus modEventBus;
     private static final CreateRegistrate REGISTRATE = CreateRegistrate.create(MODID);
 
     static {

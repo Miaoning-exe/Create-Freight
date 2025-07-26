@@ -16,14 +16,14 @@ public class CFCreativeTabs {
 
     public static final List<ItemProviderEntry<?>> ITEMS = List.of(
             CFBlocks.AUTOMATIC_TRADER,
-            CFBlocks.CARGO_STATION,
+//            CFBlocks.CARGO_STATION,
             CFBlocks.SERVER_STORE
     );
 
     public static final RegistryObject<CreativeModeTab> MAIN = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.create_freight.main"))
             .withTabsBefore(AllCreativeModeTabs.PALETTES_CREATIVE_TAB.getKey())
-            .icon(() -> CFBlocks.CARGO_STATION.get().asItem().getDefaultInstance())
+            .icon(() -> CFBlocks.AUTOMATIC_TRADER.get().asItem().getDefaultInstance())
             .displayItems((displayParameters, output) -> ITEMS.forEach(output::accept))
             .build());
 
