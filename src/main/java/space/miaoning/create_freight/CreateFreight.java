@@ -13,6 +13,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import space.miaoning.create_freight.api.event.ModEvents;
+import space.miaoning.create_freight.recipe.CFRecipeSerializers;
+import space.miaoning.create_freight.recipe.CFRecipeTypes;
 
 @Mod(CreateFreight.MODID)
 public class CreateFreight {
@@ -46,6 +48,9 @@ public class CreateFreight {
         CFBlocks.register();
         CFBlockEntityTypes.register();
         CFCreativeTabs.register(modEventBus);
+
+        CFRecipeSerializers.SERIALIZERS.register(modEventBus);
+        CFRecipeTypes.RECIPE_TYPES.register(modEventBus);
 
     }
 

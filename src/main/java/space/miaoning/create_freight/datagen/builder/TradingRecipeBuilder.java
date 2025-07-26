@@ -3,16 +3,13 @@ package space.miaoning.create_freight.datagen.builder;
 import com.google.gson.JsonObject;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import space.miaoning.create_freight.CreateFreight;
-import space.miaoning.create_freight.recipe.ModRecipeSerializers;
+import space.miaoning.create_freight.recipe.CFRecipeSerializers;
 
 import java.util.function.Consumer;
 
@@ -79,7 +76,7 @@ public class TradingRecipeBuilder {
 
         @Override
         public RecipeSerializer<?> getType() {
-            return ModRecipeSerializers.TRADING.get();
+            return CFRecipeSerializers.TRADING.get();
         }
 
         @Override

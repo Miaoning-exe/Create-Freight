@@ -7,7 +7,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -57,12 +56,12 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return ModRecipeSerializers.TRADING.get();
+        return CFRecipeSerializers.TRADING.get();
     }
 
     @Override
     public RecipeType<?> getType() {
-        return ModRecipeTypes.TRADING.get();
+        return CFRecipeTypes.TRADING.get();
     }
 
     public static class Serializer implements RecipeSerializer<TradingRecipe> {

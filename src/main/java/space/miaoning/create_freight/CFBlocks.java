@@ -14,8 +14,8 @@ public class CFBlocks {
     public static final BlockEntry<AutomaticTraderBlock> AUTOMATIC_TRADER = REGISTRATE
             .block("automatic_trader", AutomaticTraderBlock::new)
             .initialProperties(SharedProperties::stone)
-            .blockstate((c, p) ->
-                    p.horizontalBlock(c.getEntry(), p.models().cubeAll(c.getName(), p.modLoc("block/stock_keeper"))))
+//            .blockstate((c, p) ->
+//                    p.horizontalBlock(c.getEntry(), p.models().cubeAll(c.getName(), p.modLoc("block/stock_keeper"))))
             .simpleItem()
             .register();
 
@@ -27,8 +27,8 @@ public class CFBlocks {
     public static final BlockEntry<ServerStoreBlock> SERVER_STORE = REGISTRATE
             .block("server_store", ServerStoreBlock::new)
             .initialProperties(SharedProperties::stone)
-            .blockstate((c, p) ->
-                    p.horizontalBlock(c.getEntry(), p.models().cubeAll(c.getName(), p.modLoc("block/server_store"))))
+//            .blockstate((c, p) ->
+//                    p.horizontalBlock(c.getEntry(), p.models().cubeAll(c.getName(), p.modLoc("block/server_store"))))
             .simpleItem()
             .register();
 
