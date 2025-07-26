@@ -1,9 +1,8 @@
 package space.miaoning.create_freight.recipe;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.core.NonNullList;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -17,19 +16,28 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashMap;
+import java.util.Map;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class TradingRecipe implements Recipe<SimpleContainer> {
     private final ResourceLocation id;
     private final ItemStack sell;
     private final ItemStack cost;
     private final int limit;
-    private final NonNullList<BiomeWithWeight> regionWeights;
+    private final Map<String, Integer> region_weights;
 
-    public TradingRecipe(ResourceLocation id, ItemStack sell, ItemStack cost, int limit, NonNullList<BiomeWithWeight> regionWeights) {
+    public TradingRecipe(ResourceLocation id,
+                         ItemStack sell, ItemStack cost,
+                         int limit,
+                         Map<String, Integer> region_weights) {
         this.id = id;
         this.sell = sell;
         this.cost = cost;
         this.limit = limit;
-        this.regionWeights = regionWeights;
+        this.region_weights = region_weights;
     }
 
     @Override
@@ -49,22 +57,6 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     @Override
     public boolean canCraftInDimensions(int i, int i1) {
         return true;
-    }
-
-    public ItemStack getCost() {
-        return cost.copy();
-    }
-
-    public ItemStack getSell() {
-        return sell.copy();
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public NonNullList<BiomeWithWeight> getRegionWeights() {
-        return regionWeights;
     }
 
     @Override
@@ -87,45 +79,58 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         return CFRecipeTypes.TRADING_POST.get();
     }
 
+    public ItemStack getSell() {
+        return sell.copy();
+    }
+
+    public ItemStack getCost() {
+        return cost.copy();
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public Map<String, Integer> getRegionWeights() {
+        return region_weights;
+    }
+
     public static class Serializer implements RecipeSerializer<TradingRecipe> {
 
         @Override
         public TradingRecipe fromJson(ResourceLocation pId, JsonObject pJson) {
-            ItemStack sell = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(pJson,"sell"),true);
-            ItemStack cost = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(pJson,"cost"),true);
-            int limit = GsonHelper.getAsInt(pJson,"limit");
-            NonNullList<BiomeWithWeight> biomes = NonNullList.create();
-            for (JsonElement jsonElement: GsonHelper.getAsJsonArray(pJson,"region_weights")) {
-                biomes.add(BiomeWithWeight.deserialize(jsonElement));
+            ItemStack sell = CraftingHelper.getItemStack(
+                    GsonHelper.getAsJsonObject(pJson, "sell"), true);
+            ItemStack cost = CraftingHelper.getItemStack(
+                    GsonHelper.getAsJsonObject(pJson, "cost"), true);
+            int limit = GsonHelper.getAsInt(pJson, "limit", -1);
+            Map<String, Integer> region_weights = new HashMap<>();
+            for (Map.Entry<String, JsonElement> entry :
+                    GsonHelper.getAsJsonObject(pJson, "region_weights").entrySet()) {
+                region_weights.put(entry.getKey(), entry.getValue().getAsInt());
             }
-            return new TradingRecipe(pId,sell,cost,limit,biomes);
+
+            return new TradingRecipe(pId, sell, cost, limit, region_weights);
         }
 
         @Override
         public @Nullable TradingRecipe fromNetwork(ResourceLocation pId, FriendlyByteBuf pBuffer) {
             ItemStack sell = pBuffer.readItem();
             ItemStack cost = pBuffer.readItem();
-            int limit = pBuffer.readInt();
-            int i = pBuffer.readVarInt();
-            NonNullList<BiomeWithWeight> biomes = NonNullList.withSize(i,BiomeWithWeight.EMPTY);
+            int limit = pBuffer.readVarInt();
+            Map<String, Integer> region_weights = pBuffer.readMap(
+                    FriendlyByteBuf::readUtf, FriendlyByteBuf::readVarInt);
 
-            for(int j=0;j<biomes.size();++j) {
-                biomes.set(j,BiomeWithWeight.read(pBuffer));
-            }
-
-            return new TradingRecipe(pId,sell,cost,limit,biomes);
+            return new TradingRecipe(pId, sell, cost, limit, region_weights);
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf pBuffer, TradingRecipe pRecipe) {
             pBuffer.writeItem(pRecipe.sell);
             pBuffer.writeItem(pRecipe.cost);
-            pBuffer.writeInt(pRecipe.limit);
-            pBuffer.writeInt(pRecipe.regionWeights.size());
-
-            for (BiomeWithWeight biome : pRecipe.regionWeights) {
-                biome.write(pBuffer);
-            }
+            pBuffer.writeVarInt(pRecipe.limit);
+            pBuffer.writeMap(
+                    pRecipe.region_weights, FriendlyByteBuf::writeUtf, FriendlyByteBuf::writeVarInt);
         }
     }
 }

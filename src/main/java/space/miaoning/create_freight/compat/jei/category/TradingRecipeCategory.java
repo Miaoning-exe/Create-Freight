@@ -1,8 +1,7 @@
 package space.miaoning.create_freight.compat.jei.category;
 
+import com.simibubi.create.AllBlocks;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
-import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.placement.HorizontalAlignment;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
@@ -10,41 +9,51 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 import space.miaoning.create_freight.CreateFreight;
-import space.miaoning.create_freight.recipe.BiomeWithWeight;
 import space.miaoning.create_freight.recipe.TradingRecipe;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
 public class TradingRecipeCategory extends AbstractRecipeCategory<TradingRecipe> {
-    public static final int width = 92;//82
+    public static final int width = 82;
     public static final int height = 34;
 
-    public static final RecipeType<TradingRecipe> TYPE = RecipeType.create(CreateFreight.MODID,"trading_post", TradingRecipe.class);
+    public static final RecipeType<TradingRecipe> TYPE = RecipeType.create(
+            CreateFreight.MODID, "trading_post", TradingRecipe.class);
 
     public TradingRecipeCategory(IGuiHelper helper) {
         super(
                 TYPE,
-                Component.literal("Trading Post"),
-                helper.createDrawableItemLike(Items.EMERALD),
+                Component.translatable("jei.create_freight.trading_post"),
+                helper.createDrawableItemLike(AllBlocks.TABLE_CLOTHS.get(DyeColor.RED)),
                 width,
                 height);
     }
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder pBuilder, TradingRecipe pRecipe, IFocusGroup iFocusGroup) {
-        pBuilder.addInputSlot(1,9)
+        pBuilder.addInputSlot(1, 9)
                 .setStandardSlotBackground()
                 .addItemStack(pRecipe.getCost());
 
-        pBuilder.addOutputSlot(61,9)
+        pBuilder.addOutputSlot(61, 9)
                 .setOutputSlotBackground()
                 .addItemStack(pRecipe.getSell())
                 .addRichTooltipCallback(((iRecipeSlotView, iTooltipBuilder) -> {
-                    iTooltipBuilder.add(Component.literal("Limit:"+pRecipe.getLimit()));
-                    for (BiomeWithWeight biome:pRecipe.getRegionWeights()) {
-                        iTooltipBuilder.add(Component.literal("Biome:"+biome.getBiome().toString()+" -- Weight:"+biome.getWeight()));
-                    }
+                    int limit = pRecipe.getLimit();
+                    iTooltipBuilder.add(limit > 0
+                            ? Component.translatable("jei.create_freight.trading_post.limit", limit)
+                            : Component.translatable("jei.create_freight.trading_post.unlimited")
+                    );
+
+                    String regions = String.join("\n - ", pRecipe.getRegionWeights().keySet());
+                    iTooltipBuilder.add(
+                            Component.translatable("jei.create_freight.trading_post.regions",
+                                    regions.isEmpty() ? "-" : "\n - " + regions)
+                    );
                 }));
     }
 

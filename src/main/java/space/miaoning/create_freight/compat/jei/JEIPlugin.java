@@ -4,6 +4,7 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -12,6 +13,8 @@ import space.miaoning.create_freight.compat.jei.category.TradingRecipeCategory;
 import space.miaoning.create_freight.recipe.CFRecipeTypes;
 
 @JeiPlugin
+@SuppressWarnings("removal")
+@MethodsReturnNonnullByDefault
 public class JEIPlugin implements IModPlugin {
     private static final ResourceLocation ID = new ResourceLocation(CreateFreight.MODID,"jei_plugin");
 

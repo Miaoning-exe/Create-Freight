@@ -4,5 +4,9 @@
   "block.create_freight.server_store": "Server Store",
   "gui.create_freight.automatic_trader.shopping_list_filter": "Shopping List Filter",
   "info.create_freight.no_valid_stock_ticker": "Automatic Trader must be placed near a valid Stock Ticker to run!",
-  "itemGroup.create_freight.main": "Create Freight"
+  "itemGroup.create_freight.main": "Create Freight",
+  "jei.create_freight.trading_post": "Trading Post",
+  "jei.create_freight.trading_post.limit": "Trade Limit: %s",
+  "jei.create_freight.trading_post.unlimited": "Unlimited Trade Limit",
+  "jei.create_freight.trading_post.regions": "Regions: %s"
 }

@@ -1,8 +1,12 @@
 {
-  "block.create_freight.automatic_trader": "自动交易站",
+  "block.create_freight.automatic_trader": "自动交易台",
   "block.create_freight.cargo_station": "货运站",
   "block.create_freight.server_store": "服务器仓库",
   "gui.create_freight.automatic_trader.shopping_list_filter": "采购清单过滤器",
-  "info.create_freight.no_valid_stock_ticker": "自动交易站必须放置在有效的仓储发报机附近！",
-  "itemGroup.create_freight.main": "机械动力：货运"
+  "info.create_freight.no_valid_stock_ticker": "自动交易台必须放置在有效的仓储发报机附近！",
+  "itemGroup.create_freight.main": "机械动力：货运",
+  "jei.create_freight.trading_post": "交易站",
+  "jei.create_freight.trading_post.limit": "交易限额：%s",
+  "jei.create_freight.trading_post.unlimited": "无交易限额",
+  "jei.create_freight.trading_post.regions": "出现区域：%s"
 }
