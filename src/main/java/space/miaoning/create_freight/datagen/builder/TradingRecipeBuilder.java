@@ -1,0 +1,95 @@
+package space.miaoning.create_freight.datagen.builder;
+
+import com.google.gson.JsonObject;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
+import space.miaoning.create_freight.CreateFreight;
+import space.miaoning.create_freight.recipe.ModRecipeSerializers;
+
+import java.util.function.Consumer;
+
+public class TradingRecipeBuilder {
+    private final ItemStack sell;
+    private final ItemStack cost;
+
+    public TradingRecipeBuilder(ItemStack sell,ItemStack cost) {
+        this.sell = sell;
+        this.cost = cost;
+    }
+
+    public static TradingRecipeBuilder newRecipe(ItemLike sell,int count1,ItemLike cost,int count2) {
+        return new TradingRecipeBuilder(new ItemStack(sell,count1),new ItemStack(cost,count2));
+    }
+
+    public void build(Consumer<FinishedRecipe> consumerIn) {
+        ResourceLocation location = ForgeRegistries.ITEMS.getKey(sell.getItem());
+        build(consumerIn, CreateFreight.MODID + ":trading/" + location.getPath());
+    }
+
+    public void build(Consumer<FinishedRecipe> consumerIn, String save) {
+        ResourceLocation resourcelocation = ForgeRegistries.ITEMS.getKey(sell.getItem());
+        if ((new ResourceLocation(save)).equals(resourcelocation)) {
+            throw new IllegalStateException("Trading Recipe " + save + " should remove its 'save' argument");
+        } else {
+            consumerIn.accept(new TradingRecipeBuilder.Result(new ResourceLocation(save),sell,cost));
+        }
+    }
+
+    public static class Result implements FinishedRecipe {
+        private final ResourceLocation id;
+        private final ItemStack sell;
+        private final ItemStack cost;
+
+        public Result(ResourceLocation id, ItemStack sell, ItemStack cost) {
+            this.id = id;
+            this.sell = sell;
+            this.cost = cost;
+        }
+
+        @Override
+        public void serializeRecipeData(JsonObject pJson) {
+            JsonObject objectSell = new JsonObject();
+            addItemStack(objectSell,sell);
+            pJson.add("sell",objectSell);
+
+            JsonObject objectCost = new JsonObject();
+            addItemStack(objectCost,cost);
+            pJson.add("cost",objectCost);
+        }
+
+        private void addItemStack(JsonObject pJson,ItemStack stack) {
+            pJson.addProperty("item",ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
+            if (stack.getCount() > 1) {
+                pJson.addProperty("count",stack.getCount());
+            }
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return id;
+        }
+
+        @Override
+        public RecipeSerializer<?> getType() {
+            return ModRecipeSerializers.TRADING.get();
+        }
+
+        @Override
+        public @Nullable JsonObject serializeAdvancement() {
+            return null;
+        }
+
+        @Override
+        public @Nullable ResourceLocation getAdvancementId() {
+            return null;
+        }
+    }
+}
