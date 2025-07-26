@@ -44,6 +44,14 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         return true;
     }
 
+    public ItemStack getCost() {
+        return cost.copy();
+    }
+
+    public ItemStack getSell() {
+        return sell.copy();
+    }
+
     @Override
     public ItemStack getResultItem(RegistryAccess registryAccess) {
         return sell.copy();
