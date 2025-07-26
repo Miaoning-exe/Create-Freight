@@ -29,6 +29,6 @@ public class JEIPlugin implements IModPlugin {
     public void registerRecipes(IRecipeRegistration registration) {
         RecipeManager manager = Minecraft.getInstance().level.getRecipeManager();
 
-        registration.addRecipes(TradingRecipeCategory.TYPE,manager.getAllRecipesFor(CFRecipeTypes.TRADING.get()));
+        registration.addRecipes(TradingRecipeCategory.TYPE,manager.getAllRecipesFor(CFRecipeTypes.TRADING_POST.get()));
     }
 }

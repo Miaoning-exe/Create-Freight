@@ -2,6 +2,7 @@ package space.miaoning.create_freight.compat.jei.category;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.placement.HorizontalAlignment;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
@@ -12,18 +13,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 import space.miaoning.create_freight.CreateFreight;
+import space.miaoning.create_freight.recipe.BiomeWithWeight;
 import space.miaoning.create_freight.recipe.TradingRecipe;
 
 public class TradingRecipeCategory extends AbstractRecipeCategory<TradingRecipe> {
-    public static final int width = 82;
+    public static final int width = 92;//82
     public static final int height = 34;
 
-    public static final RecipeType<TradingRecipe> TYPE = RecipeType.create(CreateFreight.MODID,"trading", TradingRecipe.class);
+    public static final RecipeType<TradingRecipe> TYPE = RecipeType.create(CreateFreight.MODID,"trading_post", TradingRecipe.class);
 
     public TradingRecipeCategory(IGuiHelper helper) {
         super(
                 TYPE,
-                Component.literal("Trading"),
+                Component.literal("Trading Post"),
                 helper.createDrawableItemLike(Items.EMERALD),
                 width,
                 height);
@@ -37,7 +39,13 @@ public class TradingRecipeCategory extends AbstractRecipeCategory<TradingRecipe>
 
         pBuilder.addOutputSlot(61,9)
                 .setOutputSlotBackground()
-                .addItemStack(pRecipe.getSell());
+                .addItemStack(pRecipe.getSell())
+                .addRichTooltipCallback(((iRecipeSlotView, iTooltipBuilder) -> {
+                    iTooltipBuilder.add(Component.literal("Limit:"+pRecipe.getLimit()));
+                    for (BiomeWithWeight biome:pRecipe.getRegionWeights()) {
+                        iTooltipBuilder.add(Component.literal("Biome:"+biome.getBiome().toString()+" -- Weight:"+biome.getWeight()));
+                    }
+                }));
     }
 
     @Override

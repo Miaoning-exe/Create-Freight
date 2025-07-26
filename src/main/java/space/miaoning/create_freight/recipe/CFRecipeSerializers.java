@@ -9,5 +9,5 @@ import space.miaoning.create_freight.CreateFreight;
 public class CFRecipeSerializers {
     public static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, CreateFreight.MODID);
 
-    public static final RegistryObject<RecipeSerializer<TradingRecipe>> TRADING = SERIALIZERS.register("trading",TradingRecipe.Serializer::new);
+    public static final RegistryObject<RecipeSerializer<TradingRecipe>> TRADING_POST = SERIALIZERS.register("trading_post",TradingRecipe.Serializer::new);
 }

@@ -1,6 +1,9 @@
 package space.miaoning.create_freight.recipe;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -18,11 +21,15 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     private final ResourceLocation id;
     private final ItemStack sell;
     private final ItemStack cost;
+    private final int limit;
+    private final NonNullList<BiomeWithWeight> regionWeights;
 
-    public TradingRecipe(ResourceLocation id, ItemStack sell,ItemStack cost) {
+    public TradingRecipe(ResourceLocation id, ItemStack sell, ItemStack cost, int limit, NonNullList<BiomeWithWeight> regionWeights) {
         this.id = id;
         this.sell = sell;
         this.cost = cost;
+        this.limit = limit;
+        this.regionWeights = regionWeights;
     }
 
     @Override
@@ -52,6 +59,14 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         return sell.copy();
     }
 
+    public int getLimit() {
+        return limit;
+    }
+
+    public NonNullList<BiomeWithWeight> getRegionWeights() {
+        return regionWeights;
+    }
+
     @Override
     public ItemStack getResultItem(RegistryAccess registryAccess) {
         return sell.copy();
@@ -64,12 +79,12 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return CFRecipeSerializers.TRADING.get();
+        return CFRecipeSerializers.TRADING_POST.get();
     }
 
     @Override
     public RecipeType<?> getType() {
-        return CFRecipeTypes.TRADING.get();
+        return CFRecipeTypes.TRADING_POST.get();
     }
 
     public static class Serializer implements RecipeSerializer<TradingRecipe> {
@@ -78,22 +93,39 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         public TradingRecipe fromJson(ResourceLocation pId, JsonObject pJson) {
             ItemStack sell = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(pJson,"sell"),true);
             ItemStack cost = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(pJson,"cost"),true);
-
-            return new TradingRecipe(pId,sell,cost);
+            int limit = GsonHelper.getAsInt(pJson,"limit");
+            NonNullList<BiomeWithWeight> biomes = NonNullList.create();
+            for (JsonElement jsonElement: GsonHelper.getAsJsonArray(pJson,"region_weights")) {
+                biomes.add(BiomeWithWeight.deserialize(jsonElement));
+            }
+            return new TradingRecipe(pId,sell,cost,limit,biomes);
         }
 
         @Override
         public @Nullable TradingRecipe fromNetwork(ResourceLocation pId, FriendlyByteBuf pBuffer) {
             ItemStack sell = pBuffer.readItem();
             ItemStack cost = pBuffer.readItem();
+            int limit = pBuffer.readInt();
+            int i = pBuffer.readVarInt();
+            NonNullList<BiomeWithWeight> biomes = NonNullList.withSize(i,BiomeWithWeight.EMPTY);
 
-            return new TradingRecipe(pId,sell,cost);
+            for(int j=0;j<biomes.size();++j) {
+                biomes.set(j,BiomeWithWeight.read(pBuffer));
+            }
+
+            return new TradingRecipe(pId,sell,cost,limit,biomes);
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf pBuffer, TradingRecipe pRecipe) {
             pBuffer.writeItem(pRecipe.sell);
             pBuffer.writeItem(pRecipe.cost);
+            pBuffer.writeInt(pRecipe.limit);
+            pBuffer.writeInt(pRecipe.regionWeights.size());
+
+            for (BiomeWithWeight biome : pRecipe.regionWeights) {
+                biome.write(pBuffer);
+            }
         }
     }
 }
