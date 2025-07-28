@@ -60,7 +60,7 @@ public class GenChestLootTables implements LootTableSubProvider {
                     )
             );
 
-    //没有将createdeco添加为前置导致箱子里无法爆金币
+
 //                    .withPool(LootPool.lootPool()
 //                    .name("coins")
 //                    .setRolls(UniformGenerator.between(3, 6))

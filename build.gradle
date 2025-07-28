@@ -16,7 +16,7 @@ plugins {
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'       // Forge开发核心
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'    // Parchment映射支持
-    id 'org.spongepowered.mixin' version '0.7.+'               // Mixin支持
+    id 'org.spongepowered.mixin' version '0.7.+'                // Mixin支持
     id 'me.modmuss50.mod-publish-plugin' version '0.4.5'        // 自动发布支持
 }
 
@@ -143,6 +143,10 @@ repositories {
         url = "https://modmaven.dev"
     }
     maven {
+        name = "CurseMaven"
+        url "https://cursemaven.com"
+    }
+    maven {
         // Conditional Mixin
         name = "ConditionalMixin"
         url 'https://maven.fallenbreath.me/releases'
@@ -167,6 +171,7 @@ dependencies {
 
     implementation(fg.deobf("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false })
     implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}"))
+    implementation fg.deobf("curse.maven:createdeco-509285:6373226")   //createdeco
     compileOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}"))
     runtimeOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}"))
     implementation(fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}"))
