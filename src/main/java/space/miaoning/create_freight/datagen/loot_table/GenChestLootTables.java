@@ -37,11 +37,11 @@ public class GenChestLootTables implements LootTableSubProvider {
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Iron").get())
             .setWeight(5)
-                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 10)))
+                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 15)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Gold").get())
-            .setWeight(2)
-                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 3)))
+            .setWeight(3)
+                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 10)))
             );
 
     // 沙漠交易站战利品池

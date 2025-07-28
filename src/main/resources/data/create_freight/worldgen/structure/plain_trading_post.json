@@ -1,9 +1,9 @@
 {
     "type": "minecraft:jigsaw", 
-    "start_pool": "create_freight:trading_post/desert_trading_post",
+    "start_pool": "create_freight:trading_post/plain_trading_post",
     "size": 1,
     "max_distance_from_center": 80,    
-    "biomes": "#create_freight:has_structure/desert_trading_post",
+    "biomes": "#create_freight:has_structure/plain_trading_post",
     "step": "surface_structures",
     "terrain_adaptation": "beard_thin",
     "start_height": {
