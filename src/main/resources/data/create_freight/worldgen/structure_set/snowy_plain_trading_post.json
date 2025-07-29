@@ -1,7 +1,7 @@
 {
     "structures": [
         {
-            "structure": "create_freight:trading_post/desert_trading_post",
+            "structure": "create_freight:snowy_plain_trading_post",
             "weight": 1
         }
     ],

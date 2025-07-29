@@ -4,9 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
-
 
 import java.util.Map;
 import java.util.UUID;
@@ -22,9 +20,7 @@ public class ModEvents {
      */
     @SubscribeEvent
     public void onStructureGenerated(StructureGeneratedEvent event) {
-        LOGGER.info("==========================================================");
         LOGGER.info("SUCCESS! Custom event 'StructureGeneratedEvent' has fired!");
-        LOGGER.info("==========================================================");
 //        Structure structure = event.getStructure();
 //        String structureId = event.getLevel().registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(structure).toString();
 

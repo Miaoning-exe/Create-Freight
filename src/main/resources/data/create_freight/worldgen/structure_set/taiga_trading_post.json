@@ -1,0 +1,14 @@
+{
+    "structures": [
+        {
+            "structure": "create_freight:taiga_trading_post",
+            "weight": 1
+        }
+    ],
+    "placement": {
+        "type": "minecraft:random_spread",
+        "salt": 19582024,
+        "spacing": 24,
+        "separation": 12
+    }
+}

@@ -1,0 +1,25 @@
+{
+  "type": "create_freight:trading_post",
+  "cost": {
+    "count": 10,
+    "item": "minecraft:gold_nugget"
+  },
+  "limit": 1024,
+  "region_weights": [
+    {
+      "biome": "minecraft:bamboo_jungle",
+      "weight": 1
+    },
+    {
+      "biome": "minecraft:sparse_jungle",
+      "weight": 1
+    },
+    {
+      "biome": "minecraft:jungle",
+      "weight": 1
+    }
+  ],
+  "sell": {
+    "item": "minecraft:netherrack"
+  }
+}

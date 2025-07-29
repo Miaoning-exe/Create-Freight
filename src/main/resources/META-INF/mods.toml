@@ -30,6 +30,13 @@ license = "${mod_license}"
     ordering="NONE"
     side="BOTH"
 
+[[dependencies."${mod_id}"]]
+    modId="createdeco"
+    mandatory=true
+    versionRange="[2.0.0,2.9.9)"
+    ordering="NONE"
+    side="BOTH"
+
 [[mixins]]
     config="create_freight.mixins.json"
 

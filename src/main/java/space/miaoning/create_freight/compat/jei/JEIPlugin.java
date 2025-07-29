@@ -8,6 +8,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeManager;
+import org.jetbrains.annotations.NotNull;
 import space.miaoning.create_freight.CreateFreight;
 import space.miaoning.create_freight.compat.jei.category.TradingRecipeCategory;
 import space.miaoning.create_freight.recipe.CFRecipeTypes;
@@ -16,10 +17,10 @@ import space.miaoning.create_freight.recipe.CFRecipeTypes;
 @SuppressWarnings("removal")
 @MethodsReturnNonnullByDefault
 public class JEIPlugin implements IModPlugin {
-    private static final ResourceLocation ID = new ResourceLocation(CreateFreight.MODID,"jei_plugin");
+    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(CreateFreight.MODID,"jei_plugin");
 
     @Override
-    public ResourceLocation getPluginUid() {
+    public @NotNull ResourceLocation getPluginUid() {
         return ID;
     }
 

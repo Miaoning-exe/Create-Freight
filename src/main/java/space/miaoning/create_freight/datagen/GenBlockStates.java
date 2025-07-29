@@ -16,7 +16,7 @@ public class GenBlockStates extends BlockStateProvider {
     @Override
     protected void registerStatesAndModels() {
         simpleBlockWithItem(CFBlocks.SERVER_STORE.get());
-        simpleBlockWithItem(CFBlocks.CARGO_STATION.get());
+//        simpleBlockWithItem(CFBlocks.CARGO_STATION.get());
         simpleBlockWithItem(CFBlocks.AUTOMATIC_TRADER.get());
     }
 

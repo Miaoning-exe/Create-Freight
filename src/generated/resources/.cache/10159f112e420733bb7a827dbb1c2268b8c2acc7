@@ -1,0 +1,7 @@
+// 1.20.1	2025-07-26T23:38:28.3490811	Block States: create_freight
+8537d2851fe678545df6fce7c0da96a7ea393b44 assets/create_freight/blockstates/automatic_trader.json
+601c56a415829e4d3461a0a8a1dd75ed7cad6a58 assets/create_freight/blockstates/server_store.json
+c0c47d7074de8b12a35194479b4967f830954fa0 assets/create_freight/models/block/automatic_trader.json
+a1bd5954e225e092350b57bb2ba1a35d4220ec13 assets/create_freight/models/block/server_store.json
+80affc2340fecb1222e9a938a628f6ed112d47f1 assets/create_freight/models/item/automatic_trader.json
+5b6f03b15c93fdf82e0be078cdbdfe1aa5bbe9c3 assets/create_freight/models/item/server_store.json
