@@ -4,12 +4,17 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.slf4j.Logger;
+import space.miaoning.create_freight.CreateFreight;
+import space.miaoning.create_freight.config.TradingConfig;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Mod.EventBusSubscriber(modid = CreateFreight.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModEvents {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -20,6 +25,16 @@ public class ModEvents {
      */
     @SubscribeEvent
     public void onStructureGenerated(StructureGeneratedEvent event) {
+        // TODO
         LOGGER.info("SUCCESS! Custom event 'StructureGeneratedEvent' has fired!");
+    }
+
+    /**
+     * 监听FMLCommonSetupEvent事件。
+     * 当这个事件触发时，调用配置解析方法来解析配置文件
+     */
+    @SubscribeEvent
+    public static void onCommonSetup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(TradingConfig::parseRecipes);
     }
 }

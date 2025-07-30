@@ -5,16 +5,9 @@
     "item": "minecraft:gold_nugget"
   },
   "limit": 1024,
-  "region_weights": [
-    {
-      "biome": "minecraft:beach",
-      "weight": 2
-    },
-    {
-      "biome": "minecraft:desert",
-      "weight": 3
-    }
-  ],
+  "region_weights": {
+    "desert": 3
+  },
   "sell": {
     "count": 3,
     "item": "minecraft:diamond"
