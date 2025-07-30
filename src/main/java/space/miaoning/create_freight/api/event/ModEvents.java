@@ -28,13 +28,4 @@ public class ModEvents {
         // TODO
         LOGGER.info("SUCCESS! Custom event 'StructureGeneratedEvent' has fired!");
     }
-
-    /**
-     * 监听FMLCommonSetupEvent事件。
-     * 当这个事件触发时，调用配置解析方法来解析配置文件
-     */
-    @SubscribeEvent
-    public static void onCommonSetup(final FMLCommonSetupEvent event) {
-        event.enqueueWork(TradingConfig::parseRecipes);
-    }
 }

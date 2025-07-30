@@ -1,6 +1,5 @@
 package space.miaoning.create_freight.recipe;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -107,15 +106,9 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
             int limit = GsonHelper.getAsInt(pJson, "limit", -1);
 
             Map<String, Integer> region_weights = new HashMap<>();
-
-            JsonArray regionWeightsArray = GsonHelper.getAsJsonArray(pJson, "region_weights");
-            for (JsonElement element : regionWeightsArray) {
-                JsonObject weightObject = element.getAsJsonObject();
-
-                String region = GsonHelper.getAsString(weightObject, "biome");
-                int weight = GsonHelper.getAsInt(weightObject, "weight");
-
-                region_weights.put(region, weight);
+            for (Map.Entry<String, JsonElement> entry :
+                    GsonHelper.getAsJsonObject(pJson, "region_weights").entrySet()) {
+                region_weights.put(entry.getKey(), entry.getValue().getAsInt());
             }
 
             return new TradingRecipe(pId, sell, cost, limit, region_weights);

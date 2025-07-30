@@ -19,7 +19,7 @@ public class TradingConfig {
     public static final ForgeConfigSpec SPEC;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> TRADING_RECIPES;
 
-    private static final List<TradingRecipe> PARSED_RECIPES = new ArrayList<>();
+    public static final List<TradingRecipe> PARSED_RECIPES = new ArrayList<>();
 
     //定义配方的配置格式
     static {
@@ -28,8 +28,8 @@ public class TradingConfig {
         TRADING_RECIPES = BUILDER
                 .comment(
                         "在这里定义交易站的配方",
-                        "格式: \"商品;商品数量|价格|交易上限|生物群系1:权重1,生物群系2:权重2,...\"",
-                        "示例: \"minecraft:diamond;1|minecraft:emerald;10|64|minecraft:plains:5,minecraft:forest:3\""
+                        "格式: \"商品;商品数量|货币种类;价格|交易上限|生物群系1,权重1;生物群系2,权重2;...\"",
+                        "示例: \"minecraft:diamond;1|minecraft:emerald;10|64|minecraft:plains,5;minecraft:forest,3\""
                 )
                 .defineList(
                         "tradingRecipes",
@@ -71,10 +71,10 @@ public class TradingConfig {
 
                 // 解析区域权重
                 Map<String, Integer> regionWeights = new HashMap<>();
-                String[] weightKVs = split[3].split(",");
+                String[] weightKVs = split[3].split(";");
 
                 for (String aWeightKV : weightKVs) {
-                    String[] KeyVal = aWeightKV.split(":");
+                    String[] KeyVal = aWeightKV.split(",");
                     regionWeights.put(KeyVal[0], Integer.parseInt(KeyVal[1]));
                 }
 
