@@ -47,7 +47,7 @@ public class ChunkGeneratorMixin {
             return;
         }
 
-        StructureGeneratedEvent event = new StructureGeneratedEvent(structurestart, pChunk);
+        StructureGeneratedEvent event = new StructureGeneratedEvent(structurestart, pChunk, pStructureManager, pRegistryAccess, pStructureTemplateManager, pChunkPos, pSectionPos);
         MinecraftForge.EVENT_BUS.post(event);
 
     }

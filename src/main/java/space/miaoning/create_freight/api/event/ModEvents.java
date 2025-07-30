@@ -21,16 +21,5 @@ public class ModEvents {
     @SubscribeEvent
     public void onStructureGenerated(StructureGeneratedEvent event) {
         LOGGER.info("SUCCESS! Custom event 'StructureGeneratedEvent' has fired!");
-//        Structure structure = event.getStructure();
-//        String structureId = event.getLevel().registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(structure).toString();
-
-//        if (!structureId.startsWith(CreateFreight.MODID)) return;
-
-//        UUID ChannelId = UUID.randomUUID();
-    }
-
-    @SubscribeEvent
-    public void testEvent(BlockEvent.BreakEvent event) {
-        LOGGER.info("测试事件被触发");
     }
 }

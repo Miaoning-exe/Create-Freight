@@ -8,6 +8,7 @@ import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -18,11 +19,8 @@ import space.miaoning.create_freight.recipe.CFRecipeTypes;
 
 @Mod(CreateFreight.MODID)
 public class CreateFreight {
-    // Define mod id in a common place for everything to reference
     public static final String MODID = "create_freight";
-    // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
-
     private static final CreateRegistrate REGISTRATE = CreateRegistrate.create(MODID);
 
     static {
@@ -35,26 +33,24 @@ public class CreateFreight {
     @SuppressWarnings("removal")
     public CreateFreight() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        MinecraftForge.EVENT_BUS.register(new ModEvents());
+
+        // 使用 CreateRegistrate 处理注册
         REGISTRATE.registerEventListeners(modEventBus);
-
-        // Register the commonSetup method for mod loading
-        modEventBus.addListener(this::commonSetup);
-
-        //注册创造物品栏
-        REGISTRATE.setCreativeTab(CFCreativeTabs.MAIN);
+        // 注册事件总线
+        MinecraftForge.EVENT_BUS.register(new ModEvents());
+        // 注册其他
         CFBlocks.register();
         CFBlockEntityTypes.register();
         CFCreativeTabs.register(modEventBus);
 
         CFRecipeSerializers.SERIALIZERS.register(modEventBus);
         CFRecipeTypes.RECIPE_TYPES.register(modEventBus);
-
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
+    @SubscribeEvent
+    public static void onCommonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-
+            LOGGER.info("Create: Freight Common Setup Complete.");
         });
     }
 
