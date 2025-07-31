@@ -8,11 +8,7 @@ import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import space.miaoning.create_freight.api.event.ModEvents;
@@ -39,11 +35,7 @@ public class CreateFreight {
 
         // 使用 CreateRegistrate 处理注册
         REGISTRATE.registerEventListeners(modEventBus);
-        // 注册事件总线
-        MinecraftForge.EVENT_BUS.register(new ModEvents());
-        // 注册配置文件
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, TradingConfig.SPEC, "create_freight-server.toml");
-        // 注册其他
+
         CFBlocks.register();
         CFBlockEntityTypes.register();
         CFCreativeTabs.register(modEventBus);
@@ -51,6 +43,10 @@ public class CreateFreight {
         CFRecipeSerializers.SERIALIZERS.register(modEventBus);
         CFRecipeTypes.RECIPE_TYPES.register(modEventBus);
 
+        // 注册事件总线
+        MinecraftForge.EVENT_BUS.register(new ModEvents());
+        // 注册配置文件
+        TradingConfig.register();
     }
 
     public static CreateRegistrate getRegistrate() {

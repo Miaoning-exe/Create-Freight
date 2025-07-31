@@ -2,13 +2,10 @@ package space.miaoning.create_freight.api.event;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.slf4j.Logger;
 import space.miaoning.create_freight.CreateFreight;
-import space.miaoning.create_freight.config.TradingConfig;
 
 import java.util.Map;
 import java.util.UUID;
