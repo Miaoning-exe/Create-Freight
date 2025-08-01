@@ -1,16 +1,10 @@
 package space.miaoning.create_freight.config;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import space.miaoning.create_freight.CreateFreight;
 import space.miaoning.create_freight.recipe.TradingRecipe;
@@ -24,8 +18,6 @@ public class TradingConfig {
     public static final ForgeConfigSpec SPEC;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> TRADING_RECIPES;
 
-    public static final List<TradingRecipe> PARSED_RECIPES = new ArrayList<>();
-
     //定义配方的配置格式
     static {
         BUILDER.push("trading");
@@ -33,8 +25,10 @@ public class TradingConfig {
         TRADING_RECIPES = BUILDER
                 .comment(
                         "在这里定义交易站的配方",
-                        "格式: \"商品;商品数量|货币种类;价格|交易上限|生物群系1,权重1;生物群系2,权重2;...\"",
-                        "示例: \"minecraft:diamond;1|minecraft:emerald;10|64|minecraft:plains,5;minecraft:forest,3\""
+                        "配方格式: \"出售的物品|消耗的物品|交易上限|生物群系1,权重1;生物群系2,权重2;...\"",
+                        "物品格式（支持NBT）：\"数量<空格>物品ID{NBT数据}\"",
+                        "示例1: \"1 minecraft:coal|32 minecraft:diamond|1024|minecraft:desert,2;minecraft:plain,3\"",
+                        "示例2: \"1 minecraft:diamond_sword{Enchantments:[{id:\\\"minecraft:sharpness\\\",lvl:5s}]}|32 minecraft:diamond|100|minecraft:desert,2;minecraft:plain,3\""
                 )
                 .defineList(
                         "tradingRecipes",
@@ -45,76 +39,6 @@ public class TradingConfig {
         SPEC = BUILDER.build();
     }
 
-//    public static void parseRecipes() {
-//        PARSED_RECIPES.clear(); //每次重载时清空旧配方
-//        List<? extends String> configValues = TRADING_RECIPES.get();
-//        int recipeIndex = 0;
-//
-//        for (String aRecipe : configValues) {
-//            try {
-//                String[] split = aRecipe.split("\\|");
-//                if (split.length != 4) {
-//                    throw new IllegalArgumentException("配方必须有4个部分，用'|'分隔!");
-//                }
-//
-//                // 解析商品
-//                String[] sellParts = split[0].split(";");
-//                ItemStack sellStack = new ItemStack(
-//                        Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(new ResourceLocation(sellParts[0]))),
-//                        Integer.parseInt(sellParts[1])
-//                );
-//
-//                // 解析货币物品和价格
-//                String[] costParts = split[1].split(";");
-//                ItemStack costStack = new ItemStack(
-//                        Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(new ResourceLocation(costParts[0]))),
-//                        Integer.parseInt(costParts[1])
-//                );
-//
-//                // 解析交易上限
-//                int limit = Integer.parseInt(split[2]);
-//
-//                // 解析区域权重
-//                Map<String, Integer> regionWeights = new HashMap<>();
-//                String[] weightKVs = split[3].split(";");
-//
-//                for (String aWeightKV : weightKVs) {
-//                    String[] KeyVal = aWeightKV.split(",");
-//                    regionWeights.put(KeyVal[0], Integer.parseInt(KeyVal[1]));
-//                }
-//
-//                // 生成ID
-//                ResourceLocation id = new ResourceLocation(CreateFreight.MODID, "configured/trade_" + recipeIndex++);
-//
-//                PARSED_RECIPES.add(new TradingRecipe(id, sellStack, costStack, limit, regionWeights));
-//
-//            } catch (Exception e) {
-//                LOGGER.error("Ignoring a wrong recipe '{}': {}", aRecipe, e.getMessage());
-//            }
-//        }
-//    }
-//
-//    @SubscribeEvent
-//    public void onSetup(FMLCommonSetupEvent event) {
-//        parseRecipes();
-//    }
-//
-//    @SubscribeEvent
-//    public void onLoad(ModConfigEvent.Reloading event) {
-//        parseRecipes();
-//    }
-//
-//    public static ForgeConfigSpec.Builder getBUILDER() {
-//        return BUILDER;
-//    }
-//
-//    public static ForgeConfigSpec.ConfigValue<List<? extends String>> getTradingRecipes() {
-//        return TRADING_RECIPES;
-//    }
-//
-//    public static ForgeConfigSpec getSPEC() {
-//        return SPEC;
-//    }
 
     public static void register() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, TradingConfig.SPEC, "create_freight-server.toml");

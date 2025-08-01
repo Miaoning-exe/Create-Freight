@@ -2,27 +2,24 @@ package space.miaoning.create_freight.api.event;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.slf4j.Logger;
 import space.miaoning.create_freight.CreateFreight;
 import space.miaoning.create_freight.config.TradingConfig;
 import space.miaoning.create_freight.mixin.RecipeManagerMixin;
 import space.miaoning.create_freight.recipe.TradingRecipe;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,6 +58,10 @@ public class RecipeEventHandler {
 //        addRecipesFromConfig(recipeManager);
 //    }
 
+    /**
+     * Use RecipeManagerMixin to modify the RecipeManager's recipe Map.
+     * @param recipeManager The RecipeManager instance of the current server.
+     */
     private static void addRecipesFromConfig(RecipeManager recipeManager) {
         var recipeStrings = TradingConfig.TRADING_RECIPES.get();
         if (recipeStrings.isEmpty()) {
@@ -69,7 +70,6 @@ public class RecipeEventHandler {
         }
 
         Map<ResourceLocation, TradingRecipe> newRecipes = new HashMap<>();
-        int successfulCount = 0;
 
         for (int i = 0; i < recipeStrings.size(); i++) {
             String recipeString = recipeStrings.get(i);
@@ -77,7 +77,6 @@ public class RecipeEventHandler {
                 ResourceLocation id = new ResourceLocation(CreateFreight.MODID, "from_config/trading_" + i);
                 TradingRecipe recipe = parseRecipeFromString(id, recipeString);
                 newRecipes.put(id, recipe);
-                successfulCount++;
             } catch (Exception e) {
                 LOGGER.error("Failed to parse dynamic recipe at index {}: '{}'. Reason: {}", i, recipeString, e.getMessage());
             }
@@ -90,7 +89,7 @@ public class RecipeEventHandler {
         try {
             var accessor = (RecipeManagerMixin) recipeManager;
 
-            // 1. 获取旧的配方Map
+            // 获取旧的配方Map
             Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> newRecipesByType = new HashMap<>();
             accessor.getRecipes().forEach((type, map) -> newRecipesByType.put(type, new HashMap<>(map)));
 
@@ -98,11 +97,11 @@ public class RecipeEventHandler {
                 newRecipesByType.computeIfAbsent(recipe.getType(), t -> new HashMap<>()).put(id, recipe);
             });
 
-            // 2. 获取旧的 byName Map
+            // 获取旧的 byName Map
             Map<ResourceLocation, Recipe<?>> newByName = new HashMap<>(accessor.getByName());
             newByName.putAll(newRecipes);
 
-            // 3. 将可变的Map转换为不可变Map再进行设置
+            // 将可变的Map转换为不可变Map再进行设置
             Map<RecipeType<?>, ImmutableMap<ResourceLocation, Recipe<?>>> immutableRecipesByType =
                     newRecipesByType.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> ImmutableMap.copyOf(e.getValue())));
 
@@ -120,15 +119,14 @@ public class RecipeEventHandler {
         String[] parts = recipeString.split("\\|");
         if (parts.length != 4) throw new IllegalArgumentException("Recipe string must have 4 parts separated by '|'");
 
-        String[] sellParts = parts[0].split(";");
-        ItemStack sellStack = getItemStackFromString(sellParts[0], Integer.parseInt(sellParts[1]));
-
-        String[] costParts = parts[1].split(";");
-        ItemStack costStack = getItemStackFromString(costParts[0], Integer.parseInt(costParts[1]));
+        ItemStack sellStack = getItemStackFromString(parts[0]);
+        ItemStack costStack = getItemStackFromString(parts[1]);
 
         int limit = Integer.parseInt(parts[2]);
 
         Map<String, Integer> regionWeights = new HashMap<>();
+
+        // 注意：这里的分割符';'只用于区域权重
         String[] regionParts = parts[3].split(";");
         for (String regionPart : regionParts) {
             String[] weightParts = regionPart.split(",");
@@ -139,9 +137,46 @@ public class RecipeEventHandler {
         return new TradingRecipe(id, sellStack, costStack, limit, regionWeights);
     }
 
-    private static ItemStack getItemStackFromString(String itemId, int count) {
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
-        if (item == null) throw new IllegalArgumentException("Item not found: " + itemId);
-        return new ItemStack(item, count);
+    private static ItemStack getItemStackFromString(String itemString) {
+        try {
+            itemString = itemString.trim();
+
+            // 解析原生格式: "count item_id{NBT}"
+            String[] parts = itemString.split(" ", 2);
+            if (parts.length < 2) {
+                throw new IllegalArgumentException("Invalid format. Expected 'count item_id{nbt}'. Got: " + itemString);
+            }
+            int count = Integer.parseInt(parts[0]);
+            String itemDefinition = parts[1];
+
+            String itemIdString;
+            String nbtPart = null;
+
+            int nbtSeparatorIndex = itemDefinition.indexOf('{');
+            if (nbtSeparatorIndex != -1) {
+                itemIdString = itemDefinition.substring(0, nbtSeparatorIndex);
+                nbtPart = itemDefinition.substring(nbtSeparatorIndex);
+            } else {
+                itemIdString = itemDefinition;
+            }
+
+            // 构建 ItemStack
+            ResourceLocation itemId = new ResourceLocation(itemIdString);
+            Item item = ForgeRegistries.ITEMS.getValue(itemId);
+            if (item == null) {
+                throw new IllegalArgumentException("Item not found: " + itemIdString);
+            }
+
+            ItemStack itemStack = new ItemStack(item, count);
+
+            if (nbtPart != null && !nbtPart.isEmpty()) {
+                CompoundTag tag = TagParser.parseTag(nbtPart);
+                itemStack.setTag(tag);
+            }
+            return itemStack;
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to create ItemStack from string: '" + itemString + "'. Error: " + e.getMessage(), e);
+        }
     }
 }

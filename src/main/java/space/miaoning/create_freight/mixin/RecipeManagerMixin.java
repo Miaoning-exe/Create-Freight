@@ -13,20 +13,26 @@ import java.util.Map;
 public interface RecipeManagerMixin {
 
     /**
-     * 生成一个返回 'recipes' 字段的公共方法。
+     * 返回 'recipes' 字段的公共方法。
      */
     @Accessor("recipes")
     Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> getRecipes();
 
     /**
-     * 生成一个修改 'recipes' 字段的公共方法。
+     * 修改 'recipes' 字段的公共方法。
      */
     @Accessor("recipes")
     void setRecipes(Map<RecipeType<?>, ? extends Map<ResourceLocation, Recipe<?>>> recipes);
 
+    /**
+     * 返回 'recipes' 字段的公共方法。
+     */
     @Accessor("byName")
     Map<ResourceLocation, Recipe<?>> getByName();
 
+    /**
+     * 修改 'recipes' 字段的公共方法。
+     */
     @Accessor("byName")
     void setByName(Map<ResourceLocation, Recipe<?>> byName);
 }
