@@ -9,9 +9,9 @@ public class CFItems {
     private static final CreateRegistrate REGISTRATE = CreateFreight.getRegistrate();
 
     public static final ItemEntry<Item> GREEN_COIN = REGISTRATE
-            .item("green_coin", Item::new)
-            .properties(p -> p.stacksTo(1024))
-            .lang("Green Coin")
+            .item("cash", Item::new)
+            .properties(p -> p.stacksTo(64))
+            .lang("Cash")
             .register(); // 完成注册
 
     public static void register() {
