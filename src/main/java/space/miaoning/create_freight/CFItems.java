@@ -8,7 +8,7 @@ public class CFItems {
 
     private static final CreateRegistrate REGISTRATE = CreateFreight.getRegistrate();
 
-    public static final ItemEntry<Item> GREEN_COIN = REGISTRATE
+    public static final ItemEntry<Item> CASH = REGISTRATE
             .item("cash", Item::new)
             .properties(p -> p.stacksTo(64))
             .lang("Cash")

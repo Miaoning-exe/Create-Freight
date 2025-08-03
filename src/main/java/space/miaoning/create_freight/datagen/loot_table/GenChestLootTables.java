@@ -14,6 +14,7 @@ import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import org.jetbrains.annotations.NotNull;
+import space.miaoning.create_freight.CFItems;
 import space.miaoning.create_freight.CreateFreight;
 
 import java.util.function.BiConsumer;
@@ -27,21 +28,25 @@ public class GenChestLootTables implements LootTableSubProvider {
     public static final ResourceLocation SNOWY_PLAIN_TRADING_POST_CHEST = ResourceLocation.fromNamespaceAndPath(CreateFreight.MODID, "chests/snowy_plain_trading_post_chest");
 
     public static final LootPool.Builder CoinsPool = LootPool.lootPool()
-            .name("coins")
+            .name("coins&cash")
             .setRolls(UniformGenerator.between(1, 3))
             .setBonusRolls(ConstantValue.exactly(2))
 
+            .add(LootItem.lootTableItem(CFItems.CASH)
+                    .setWeight(20)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(10, 25)))
+            )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Copper").get())
-            .setWeight(20)
-                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(5, 25)))
+                    .setWeight(20)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(5, 25)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Iron").get())
-            .setWeight(10)
-                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 4)))
+                    .setWeight(10)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 4)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Gold").get())
-            .setWeight(3)
-                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 1)))
+                    .setWeight(3)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 1)))
             );
 
     // 沙漠交易站战利品池

@@ -169,7 +169,7 @@ public class RecipeEventHandler {
 
             ItemStack itemStack = new ItemStack(item, count);
 
-            if (nbtPart != null && !nbtPart.isEmpty()) {
+            if (nbtPart != null) {
                 CompoundTag tag = TagParser.parseTag(nbtPart);
                 itemStack.setTag(tag);
             }

@@ -18,7 +18,7 @@ public class CFCreativeTabs {
             CFBlocks.AUTOMATIC_TRADER,
 //            CFBlocks.CARGO_STATION,
             CFBlocks.SERVER_STORE,
-            CFItems.GREEN_COIN
+            CFItems.CASH
     );
 
     public static final RegistryObject<CreativeModeTab> MAIN = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
