@@ -38,6 +38,7 @@ public class CreateFreight {
 
         CFBlocks.register();
         CFBlockEntityTypes.register();
+        CFItems.register();
         CFCreativeTabs.register(modEventBus);
 
         CFRecipeSerializers.SERIALIZERS.register(modEventBus);

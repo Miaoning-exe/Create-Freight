@@ -17,7 +17,8 @@ public class CFCreativeTabs {
     public static final List<ItemProviderEntry<?>> ITEMS = List.of(
             CFBlocks.AUTOMATIC_TRADER,
 //            CFBlocks.CARGO_STATION,
-            CFBlocks.SERVER_STORE
+            CFBlocks.SERVER_STORE,
+            CFItems.GREEN_COIN
     );
 
     public static final RegistryObject<CreativeModeTab> MAIN = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
