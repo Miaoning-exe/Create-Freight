@@ -8,5 +8,7 @@
   "jei.create_freight.trading_post": "交易站",
   "jei.create_freight.trading_post.limit": "交易限额：%s",
   "jei.create_freight.trading_post.unlimited": "无交易限额",
-  "jei.create_freight.trading_post.regions": "出现区域：%s"
+  "jei.create_freight.trading_post.regions": "出现区域：%s",
+
+  "item.create_freight.green_coin": "绿色圆圈币"
 }
