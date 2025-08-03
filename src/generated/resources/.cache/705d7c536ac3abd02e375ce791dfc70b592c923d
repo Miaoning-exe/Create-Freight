@@ -1,12 +1,12 @@
-// 1.20.1	2025-08-03T11:43:51.0112534	Registrate Provider for create_freight [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
+// 1.20.1	2025-08-03T18:25:27.2377827	Registrate Provider for create_freight [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
 8537d2851fe678545df6fce7c0da96a7ea393b44 assets/create_freight/blockstates/automatic_trader.json
 601c56a415829e4d3461a0a8a1dd75ed7cad6a58 assets/create_freight/blockstates/server_store.json
-5a905837166afe0ec6b0f89ecfe9f628fe3a2c13 assets/create_freight/lang/en_ud.json
-f68965aba2c215ff02f3b035bef5b0ea1ca37dad assets/create_freight/lang/en_us.json
+341915bbf944c44cf47f7833337f351633f8cda6 assets/create_freight/lang/en_ud.json
+84ac231c67527e3296f8a40cb3b8b89491efbfbc assets/create_freight/lang/en_us.json
 c0c47d7074de8b12a35194479b4967f830954fa0 assets/create_freight/models/block/automatic_trader.json
 a1bd5954e225e092350b57bb2ba1a35d4220ec13 assets/create_freight/models/block/server_store.json
 80affc2340fecb1222e9a938a628f6ed112d47f1 assets/create_freight/models/item/automatic_trader.json
-d65ad0aeda9293732cef76512bd284eb7a41dbbb assets/create_freight/models/item/green_coin.json
+a746c80c2ed08a6afaf536500961ae9eff4a455b assets/create_freight/models/item/cash.json
 5b6f03b15c93fdf82e0be078cdbdfe1aa5bbe9c3 assets/create_freight/models/item/server_store.json
 7186f45cd3b5e01a15fd1e7b9d31dbb2160eefba data/create_freight/loot_tables/blocks/automatic_trader.json
 909420093c53eb2426c22f7e75bd874bbae85cd3 data/create_freight/loot_tables/blocks/server_store.json

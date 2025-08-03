@@ -28,20 +28,20 @@ public class GenChestLootTables implements LootTableSubProvider {
 
     public static final LootPool.Builder CoinsPool = LootPool.lootPool()
             .name("coins")
-            .setRolls(UniformGenerator.between(3, 6))
-            .setBonusRolls(ConstantValue.exactly(5))
+            .setRolls(UniformGenerator.between(1, 3))
+            .setBonusRolls(ConstantValue.exactly(2))
 
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Copper").get())
-            .setWeight(10)
+            .setWeight(20)
                             .apply(SetItemCountFunction.setCount(UniformGenerator.between(5, 25)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Iron").get())
-            .setWeight(5)
-                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 15)))
+            .setWeight(10)
+                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 4)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Gold").get())
             .setWeight(3)
-                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 10)))
+                            .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 1)))
             );
 
     // 沙漠交易站战利品池
