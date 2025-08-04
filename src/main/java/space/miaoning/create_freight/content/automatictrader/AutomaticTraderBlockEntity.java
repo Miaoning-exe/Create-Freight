@@ -45,6 +45,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 import org.slf4j.Logger;
+import space.miaoning.create_freight.util.NetworkHelper;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -64,7 +65,6 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
     private InventorySummary paymentEntries;
     private PackageOrder order;
     private ItemStack lastFilterItem = ItemStack.EMPTY;
-    private UUID structureChannelId;
 
     private BlockPos stockTickerPos = null;
 
@@ -94,10 +94,6 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
     public void onLoad() {
         super.onLoad();
         lazyItemHandler = LazyOptional.of(() -> itemHandler);
-
-        if (level != null && !level.isClientSide() && structureChannelId != null) {
-            LOGGER.debug("Automatic Trader at {} loaded with structure channel ID: {}", getBlockPos(), structureChannelId);
-        }
     }
 
     @Override
@@ -110,20 +106,12 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
     protected void write(CompoundTag tag, boolean clientPacket) {
         tag.put("inventory", itemHandler.serializeNBT());
         super.write(tag, clientPacket);
-
-        if (structureChannelId != null) {
-            tag.putUUID("StructureChannelId", structureChannelId);
-        }
     }
 
     @Override
     protected void read(CompoundTag tag, boolean clientPacket) {
         super.read(tag, clientPacket);
         itemHandler.deserializeNBT(tag.getCompound("inventory"));
-
-        if (tag.hasUUID("StructureChannelId")) {
-            structureChannelId = tag.getUUID("StructureChannelId");
-        }
     }
 
     @Override
@@ -260,10 +248,9 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
         if (occupiedSlots > 0)
             return;
 
-        if (!hasEnoughPaymentItems(paymentEntries))
+        if (!transferPaymentItems(receivedPayments, true))
             return;
-
-        transferPaymentToTicker(paymentEntries, receivedPayments);
+        transferPaymentItems(receivedPayments, false);
 
         tickerBE.broadcastPackageRequest(RequestType.REDSTONE, order, null, getAddress());
 
@@ -283,24 +270,7 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
         }
     }
 
-    private boolean hasEnoughPaymentItems(InventorySummary paymentEntries) {
-        InventorySummary tally = paymentEntries.copy();
-
-        for (int i = 0; i < CONTAINER_SIZE; i++) {
-            ItemStack item = itemHandler.getStackInSlot(i);
-            if (item.isEmpty())
-                continue;
-            int countOf = tally.getCountOf(item);
-            if (countOf == 0)
-                continue;
-            int toRemove = Math.min(item.getCount(), countOf);
-            tally.add(item, -toRemove);
-        }
-
-        return tally.getTotalCount() == 0;
-    }
-
-    private void transferPaymentToTicker(InventorySummary paymentEntries, IItemHandler receivedPayments) {
+    private boolean transferPaymentItems(IItemHandler receivedPayments, boolean simulate) {
         InventorySummary tally = paymentEntries.copy();
         List<ItemStack> toTransfer = new ArrayList<>();
 
@@ -314,12 +284,22 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
             int toRemove = Math.min(item.getCount(), countOf);
             tally.add(item, -toRemove);
 
+            if (simulate)
+                continue;
+
             int newStackSize = item.getCount() - toRemove;
             itemHandler.setStackInSlot(i, newStackSize == 0 ? ItemStack.EMPTY : item.copyWithCount(newStackSize));
             toTransfer.add(item.copyWithCount(toRemove));
         }
 
-        toTransfer.forEach(s -> ItemHandlerHelper.insertItemStacked(receivedPayments, s, false));
+        if (simulate) {
+            return tally.getTotalCount() == 0;
+        }
+
+        if (!NetworkHelper.isServerNetwork(shopNetwork)) {
+            toTransfer.forEach(s -> ItemHandlerHelper.insertItemStacked(receivedPayments, s, false));
+        }
+        return true;
     }
 
     private String getAddress() {
@@ -344,11 +324,6 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
             }
         }
         return address;
-    }
-
-    public void setStructureChannelId(UUID channelId) {
-        this.structureChannelId = channelId;
-        setChanged();
     }
 
     @Override

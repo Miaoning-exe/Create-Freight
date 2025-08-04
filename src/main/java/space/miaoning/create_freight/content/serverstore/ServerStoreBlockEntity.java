@@ -1,5 +1,7 @@
 package space.miaoning.create_freight.content.serverstore;
 
+import com.simibubi.create.AllBlocks;
+import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -7,9 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.DirectionalBlock;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
@@ -30,18 +30,14 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
     private final ServerStoreItemHandler itemHandler;
     private final LazyOptional<IItemHandler> lazyItemHandler;
 
-    private final List<ItemStack> presetItems = new ArrayList<>();
+    private final List<BigItemStack> presetItems = new ArrayList<>();
     private String lastUpdateDate = "";
-    private final List<ItemStack> virtualInventory = new ArrayList<>();
+    private final List<BigItemStack> virtualInventory = new ArrayList<>();
 
     public ServerStoreBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        this.itemHandler = new ServerStoreItemHandler(this::getVirtualInventory);
+        this.itemHandler = new ServerStoreItemHandler(() -> virtualInventory);
         this.lazyItemHandler = LazyOptional.of(() -> itemHandler);
-        setPreset(List.of(
-                new ItemStack(Items.CHEST, 1024),
-                new ItemStack(Items.STONE, 1024)
-        ));
     }
 
     @Override
@@ -60,36 +56,31 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
         }
     }
 
-    public void setPreset(List<ItemStack> items) {
-        this.presetItems.clear();
-        for (ItemStack stack : items) {
-            this.presetItems.add(stack.copy());
-        }
-        updateVirtualInventory();
-    }
-
     private void updateVirtualInventory() {
         if (level != null && !level.isClientSide()) {
             virtualInventory.clear();
 
-            for (ItemStack defaultItem : presetItems) {
-                ItemStack newStack = defaultItem.copy();
+            for (BigItemStack defaultItem : presetItems) {
+                BigItemStack newStack = new BigItemStack(defaultItem.stack, defaultItem.count);
                 virtualInventory.add(newStack);
             }
             setChanged();
         }
     }
 
-    private List<ItemStack> getVirtualInventory() {
-        return virtualInventory;
+    public boolean hasItems() {
+        return virtualInventory.stream().anyMatch(stack -> stack.count > 0);
     }
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
         if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            Direction facing = getBlockState().getValue(DirectionalBlock.FACING).getOpposite();
-            if (side == facing) {
-                return lazyItemHandler.cast();
+            if (level != null && side != null) {
+                BlockPos adjacentPos = worldPosition.relative(side);
+                BlockState adjacentState = level.getBlockState(adjacentPos);
+                if (AllBlocks.PACKAGER.has(adjacentState)) {
+                    return lazyItemHandler.cast();
+                }
             }
             return LazyOptional.empty();
         }
@@ -109,11 +100,11 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
 
         presetItems.clear();
         if (tag.contains("PresetItems")) {
-            ListTag presetTag = tag.getList("PresetItems", 10);
+            ListTag presetTag = tag.getList("PresetItems", Tag.TAG_COMPOUND);
             for (int i = 0; i < presetTag.size(); i++) {
                 CompoundTag stackTag = presetTag.getCompound(i);
-                ItemStack stack = ItemStack.of(stackTag);
-                if (!stack.isEmpty()) {
+                BigItemStack stack = BigItemStack.read(stackTag);
+                if (stack.count > 0) {
                     presetItems.add(stack);
                 }
             }
@@ -121,11 +112,11 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
 
         virtualInventory.clear();
         if (tag.contains("VirtualInventory")) {
-            ListTag inventoryTag = tag.getList("VirtualInventory", 10);
+            ListTag inventoryTag = tag.getList("VirtualInventory", Tag.TAG_COMPOUND);
             for (int i = 0; i < inventoryTag.size(); i++) {
                 CompoundTag stackTag = inventoryTag.getCompound(i);
-                ItemStack stack = ItemStack.of(stackTag);
-                if (!stack.isEmpty()) {
+                BigItemStack stack = BigItemStack.read(stackTag);
+                if (stack.count > 0) {
                     virtualInventory.add(stack);
                 }
             }
@@ -138,18 +129,14 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
         tag.putString("LastUpdateDate", lastUpdateDate);
 
         ListTag presetTag = new ListTag();
-        for (ItemStack stack : presetItems) {
-            CompoundTag stackTag = new CompoundTag();
-            stack.save(stackTag);
-            presetTag.add(stackTag);
+        for (BigItemStack stack : presetItems) {
+            presetTag.add(stack.write());
         }
         tag.put("PresetItems", presetTag);
 
         ListTag inventoryTag = new ListTag();
-        for (ItemStack stack : virtualInventory) {
-            CompoundTag stackTag = new CompoundTag();
-            stack.save(stackTag);
-            inventoryTag.add(stackTag);
+        for (BigItemStack stack : virtualInventory) {
+            inventoryTag.add(stack.write());
         }
         tag.put("VirtualInventory", inventoryTag);
     }

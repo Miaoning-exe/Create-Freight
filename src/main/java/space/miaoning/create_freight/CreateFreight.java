@@ -39,6 +39,8 @@ public class CreateFreight {
         CFItems.register();
         CFCreativeTabs.register(modEventBus);
 
+        CFStructureProcessors.STRUCTURE_PROCESSORS.register(modEventBus);
+
         CFRecipeSerializers.SERIALIZERS.register(modEventBus);
         CFRecipeTypes.RECIPE_TYPES.register(modEventBus);
 

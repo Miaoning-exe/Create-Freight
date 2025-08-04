@@ -1,8 +1,8 @@
 package space.miaoning.create_freight.content.serverstore;
 
+import com.simibubi.create.content.logistics.BigItemStack;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -13,31 +13,31 @@ import java.util.function.Supplier;
 @ParametersAreNonnullByDefault
 public class ServerStoreItemHandler extends ItemStackHandler {
 
-    private final Supplier<List<ItemStack>> virtualInventorySupplier;
+    private final Supplier<List<BigItemStack>> virtualInventorySupplier;
 
-    public ServerStoreItemHandler(Supplier<List<ItemStack>> virtualInventorySupplier) {
+    public ServerStoreItemHandler(Supplier<List<BigItemStack>> virtualInventorySupplier) {
         this.virtualInventorySupplier = virtualInventorySupplier;
     }
 
     @Override
     public int getSlots() {
-        List<ItemStack> inventory = virtualInventorySupplier.get();
+        List<BigItemStack> inventory = virtualInventorySupplier.get();
         return inventory != null ? inventory.size() : 0;
     }
 
     @Override
     public ItemStack getStackInSlot(int slot) {
-        List<ItemStack> inventory = virtualInventorySupplier.get();
+        List<BigItemStack> inventory = virtualInventorySupplier.get();
         if (inventory == null || slot < 0 || slot >= inventory.size()) {
             return ItemStack.EMPTY;
         }
 
-        ItemStack stack = inventory.get(slot);
-        if (stack == null || stack.isEmpty()) {
+        BigItemStack stack = inventory.get(slot);
+        if (stack == null || stack.count <= 0) {
             return ItemStack.EMPTY;
         }
 
-        return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount());
+        return stack.stack.copyWithCount(stack.count);
     }
 
     @Override
@@ -51,31 +51,27 @@ public class ServerStoreItemHandler extends ItemStackHandler {
 
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        List<ItemStack> inventory = virtualInventorySupplier.get();
+        List<BigItemStack> inventory = virtualInventorySupplier.get();
         if (inventory == null || slot < 0 || slot >= inventory.size()) {
             return ItemStack.EMPTY;
         }
 
-        ItemStack stack = inventory.get(slot);
-        if (stack == null || stack.isEmpty()) {
+        BigItemStack stack = inventory.get(slot);
+        if (stack == null || stack.count <= 0) {
             return ItemStack.EMPTY;
         }
 
-        int extractAmount = Math.min(stack.getCount(), amount);
-        extractAmount = Math.min(extractAmount, stack.getMaxStackSize());
+        int extractAmount = Math.min(stack.count, amount);
 
         if (extractAmount <= 0) {
             return ItemStack.EMPTY;
         }
 
         if (!simulate) {
-            stack.shrink(extractAmount);
-            if (stack.isEmpty()) {
-                inventory.set(slot, ItemStack.EMPTY);
-            }
+            stack.count -= extractAmount;
         }
 
-        return ItemHandlerHelper.copyStackWithSize(stack, extractAmount);
+        return stack.stack.copyWithCount(extractAmount);
     }
 
     @Override
@@ -85,15 +81,15 @@ public class ServerStoreItemHandler extends ItemStackHandler {
 
     @Override
     public int getSlotLimit(int slot) {
-        List<ItemStack> inventory = virtualInventorySupplier.get();
+        List<BigItemStack> inventory = virtualInventorySupplier.get();
         if (inventory == null || slot < 0 || slot >= inventory.size()) {
             return 0;
         }
 
-        ItemStack stack = inventory.get(slot);
-        if (stack == null || stack.isEmpty()) {
+        BigItemStack stack = inventory.get(slot);
+        if (stack == null || stack.count <= 0) {
             return 0;
         }
-        return stack.getCount();
+        return stack.count;
     }
 }
