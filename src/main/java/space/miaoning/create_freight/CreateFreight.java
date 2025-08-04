@@ -6,12 +6,10 @@ import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
-import space.miaoning.create_freight.api.event.ModEvents;
 import space.miaoning.create_freight.config.TradingConfig;
 import space.miaoning.create_freight.recipe.CFRecipeSerializers;
 import space.miaoning.create_freight.recipe.CFRecipeTypes;
@@ -44,8 +42,6 @@ public class CreateFreight {
         CFRecipeSerializers.SERIALIZERS.register(modEventBus);
         CFRecipeTypes.RECIPE_TYPES.register(modEventBus);
 
-        // 注册事件总线
-        MinecraftForge.EVENT_BUS.register(new ModEvents());
         // 注册配置文件
         TradingConfig.register();
     }
