@@ -1,6 +1,6 @@
 {
   "replace": false,
   "values": [
-    "minecraft:jungle"
+    "minecraft:is_jungle"
   ]
 }
