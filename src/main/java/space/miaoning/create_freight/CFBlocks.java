@@ -5,6 +5,7 @@ import com.simibubi.create.foundation.data.SharedProperties;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import space.miaoning.create_freight.content.automatictrader.AutomaticTraderBlock;
 import space.miaoning.create_freight.content.serverstore.ServerStoreBlock;
 
@@ -15,6 +16,7 @@ public class CFBlocks {
     public static final BlockEntry<AutomaticTraderBlock> AUTOMATIC_TRADER = REGISTRATE
             .block("automatic_trader", AutomaticTraderBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(BlockBehaviour.Properties::noOcclusion)
             .simpleItem()
             .register();
 
