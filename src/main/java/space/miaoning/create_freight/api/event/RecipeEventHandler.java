@@ -7,6 +7,7 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -23,7 +24,7 @@ import space.miaoning.create_freight.recipe.TradingRecipe;
 import java.util.HashMap;
 import java.util.Map;
 
-
+@SuppressWarnings("removal")
 @Mod.EventBusSubscriber(modid = CreateFreight.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class RecipeEventHandler {
 
@@ -31,7 +32,6 @@ public class RecipeEventHandler {
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
-        LOGGER.info("Server is starting, preparing for initial dynamic recipe load.");
         RecipeManager recipeManager = event.getServer().getRecipeManager();
         addRecipesFromConfig(recipeManager);
     }
@@ -60,6 +60,7 @@ public class RecipeEventHandler {
 
     /**
      * Use RecipeManagerMixin to modify the RecipeManager's recipe Map.
+     *
      * @param recipeManager The RecipeManager instance of the current server.
      */
     private static void addRecipesFromConfig(RecipeManager recipeManager) {
@@ -93,9 +94,8 @@ public class RecipeEventHandler {
             Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> newRecipesByType = new HashMap<>();
             accessor.getRecipes().forEach((type, map) -> newRecipesByType.put(type, new HashMap<>(map)));
 
-            newRecipes.forEach((id, recipe) -> {
-                newRecipesByType.computeIfAbsent(recipe.getType(), t -> new HashMap<>()).put(id, recipe);
-            });
+            newRecipes.forEach((id, recipe) ->
+                    newRecipesByType.computeIfAbsent(recipe.getType(), t -> new HashMap<>()).put(id, recipe));
 
             // 获取旧的 byName Map
             Map<ResourceLocation, Recipe<?>> newByName = new HashMap<>(accessor.getByName());
@@ -163,7 +163,7 @@ public class RecipeEventHandler {
             // 构建 ItemStack
             ResourceLocation itemId = new ResourceLocation(itemIdString);
             Item item = ForgeRegistries.ITEMS.getValue(itemId);
-            if (item == null) {
+            if (item == null || item.equals(Items.AIR)) {
                 throw new IllegalArgumentException("Item not found: " + itemIdString);
             }
 

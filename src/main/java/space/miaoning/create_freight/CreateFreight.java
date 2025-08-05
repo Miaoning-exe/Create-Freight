@@ -8,6 +8,7 @@ import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import space.miaoning.create_freight.config.TradingConfig;
@@ -26,10 +27,8 @@ public class CreateFreight {
                         .andThen(TooltipModifier.mapNull(KineticStats.create(item))));
     }
 
-
-    @SuppressWarnings("removal")
-    public CreateFreight() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public CreateFreight(FMLJavaModLoadingContext context) {
+        IEventBus modEventBus = context.getModEventBus();
 
         // 使用 CreateRegistrate 处理注册
         REGISTRATE.registerEventListeners(modEventBus);
@@ -39,11 +38,13 @@ public class CreateFreight {
         CFItems.register();
         CFCreativeTabs.register(modEventBus);
 
+        CFStructureProcessors.STRUCTURE_PROCESSORS.register(modEventBus);
+
         CFRecipeSerializers.SERIALIZERS.register(modEventBus);
         CFRecipeTypes.RECIPE_TYPES.register(modEventBus);
 
         // 注册配置文件
-        TradingConfig.register();
+        context.registerConfig(ModConfig.Type.SERVER, TradingConfig.SPEC, "create_freight-server.toml");
     }
 
     public static CreateRegistrate getRegistrate() {

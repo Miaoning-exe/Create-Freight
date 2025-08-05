@@ -6,7 +6,7 @@
       "weight": 100,
       "element": {
         "location": "create_freight:trading_post/snowy_plain_trading_post",
-        "processors": "minecraft:empty",
+        "processors": "create_freight:snowy_plain_trading_post_processor",
         "projection": "rigid",
         "element_type": "minecraft:legacy_single_pool_element"
       }
