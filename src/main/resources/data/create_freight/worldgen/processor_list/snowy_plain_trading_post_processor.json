@@ -5,7 +5,8 @@
         },
         {
             "processor_type": "create_freight:trading_recipe_processor",
-            "region": "snowy_plain"
+            "region": "snowy_plain",
+            "recipe_amount": 1
         }
     ]
 }

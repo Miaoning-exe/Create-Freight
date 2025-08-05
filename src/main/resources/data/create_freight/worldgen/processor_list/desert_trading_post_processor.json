@@ -5,7 +5,8 @@
         },
         {
             "processor_type": "create_freight:trading_recipe_processor",
-            "region": "desert"
+            "region": "desert",
+            "recipe_amount": 3
         }
     ]
 }

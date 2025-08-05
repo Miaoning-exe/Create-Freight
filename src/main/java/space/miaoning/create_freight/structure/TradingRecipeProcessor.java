@@ -17,9 +17,9 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import space.miaoning.create_freight.CFBlocks;
 import space.miaoning.create_freight.CFStructureProcessors;
-import space.miaoning.create_freight.core.TradingManager;
 import space.miaoning.create_freight.recipe.TradingRecipe;
 import space.miaoning.create_freight.util.NetworkHelper;
+import space.miaoning.create_freight.util.TradingRecipeHelper;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -30,18 +30,25 @@ import java.util.Map;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class TradingRecipeProcessor extends StructureProcessor {
+
     public static final Codec<TradingRecipeProcessor> CODEC = RecordCodecBuilder.create(instance -> instance
-            .group(Codec.STRING.fieldOf("region").forGetter(processor -> processor.regionName))
+            .group(
+                    Codec.STRING.fieldOf("region").forGetter(processor -> processor.regionName),
+                    Codec.INT.fieldOf("recipe_amount").forGetter(processor -> processor.recipeAmount)
+            )
             .apply(instance, TradingRecipeProcessor::new)
     );
 
     private final String regionName;
+    private final int recipeAmount;
+
     private static final Map<BlockPos, List<TradingRecipe>> structureTradings = new HashMap<>();
     private static final Map<BlockPos, Integer> usedTradingCount = new HashMap<>();
     private static final Map<BlockPos, BlockPos> stockTickerPositions = new HashMap<>();
 
-    public TradingRecipeProcessor(String regionName) {
+    public TradingRecipeProcessor(String regionName, int recipeAmount) {
         this.regionName = regionName;
+        this.recipeAmount = recipeAmount;
     }
 
     @Override
@@ -54,7 +61,7 @@ public class TradingRecipeProcessor extends StructureProcessor {
                                                         @Nullable StructureTemplate template) {
 
         if (!structureTradings.containsKey(jigsawPieceBottomCenterPos)) {
-            List<TradingRecipe> recipes = TradingManager.getRandomTradingRecipes(regionName, 3);
+            List<TradingRecipe> recipes = TradingRecipeHelper.getRandomTradingRecipes(regionName, recipeAmount);
             structureTradings.put(jigsawPieceBottomCenterPos, recipes);
             usedTradingCount.put(jigsawPieceBottomCenterPos, 0);
         }
@@ -109,28 +116,7 @@ public class TradingRecipeProcessor extends StructureProcessor {
             nbt.put("TargetOffset", NbtUtils.writeBlockPos(offset));
             nbt.putByte("Valid", (byte) 1);
 
-            // 设置cost
-            ItemStack cost = selectedRecipe.getCost();
-            nbt.put("Filter", cost.copyWithCount(1).serializeNBT());
-            nbt.putInt("FilterAmount", cost.getCount());
-
-            // 设置sell
-            CompoundTag encodedRequest = new CompoundTag();
-            ListTag orderedCrafts = new ListTag();
-            encodedRequest.put("OrderedCrafts", orderedCrafts);
-
-            CompoundTag orderedStacks = new CompoundTag();
-            ListTag entries = new ListTag();
-
-            ItemStack sell = selectedRecipe.getSell();
-            CompoundTag entry = new CompoundTag();
-            entry.put("Item", sell.copyWithCount(1).serializeNBT());
-            entry.putInt("Amount", sell.getCount());
-
-            entries.add(entry);
-            orderedStacks.put("Entries", entries);
-            encodedRequest.put("OrderedStacks", orderedStacks);
-            nbt.put("EncodedRequest", encodedRequest);
+            setRecipeNbt(nbt, selectedRecipe);
 
             return new StructureTemplate.StructureBlockInfo(
                     blockInfoGlobal.pos(),
@@ -140,6 +126,31 @@ public class TradingRecipeProcessor extends StructureProcessor {
         }
 
         return blockInfoGlobal;
+    }
+
+    private static void setRecipeNbt(CompoundTag nbt, TradingRecipe recipe) {
+        // 设置cost
+        ItemStack cost = recipe.getCost();
+        nbt.put("Filter", cost.copyWithCount(1).serializeNBT());
+        nbt.putInt("FilterAmount", cost.getCount());
+
+        // 设置sell
+        CompoundTag encodedRequest = new CompoundTag();
+        ListTag orderedCrafts = new ListTag();
+        encodedRequest.put("OrderedCrafts", orderedCrafts);
+
+        CompoundTag orderedStacks = new CompoundTag();
+        ListTag entries = new ListTag();
+
+        ItemStack sell = recipe.getSell();
+        CompoundTag entry = new CompoundTag();
+        entry.put("Item", sell.copyWithCount(1).serializeNBT());
+        entry.putInt("Amount", sell.getCount());
+
+        entries.add(entry);
+        orderedStacks.put("Entries", entries);
+        encodedRequest.put("OrderedStacks", orderedStacks);
+        nbt.put("EncodedRequest", encodedRequest);
     }
 
     @Override

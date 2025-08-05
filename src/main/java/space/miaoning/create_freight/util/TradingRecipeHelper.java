@@ -1,4 +1,4 @@
-package space.miaoning.create_freight.core;
+package space.miaoning.create_freight.util;
 
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -10,7 +10,7 @@ import space.miaoning.create_freight.recipe.TradingRecipe;
 import java.util.*;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class TradingManager {
+public class TradingRecipeHelper {
     private static final List<TradingRecipe> tradingRecipes = new ArrayList<>();
 
     @SubscribeEvent

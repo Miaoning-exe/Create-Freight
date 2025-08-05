@@ -5,7 +5,8 @@
         },
         {
             "processor_type": "create_freight:trading_recipe_processor",
-            "region": "jungle"
+            "region": "jungle",
+            "recipe_amount": 3
         }
     ]
 }
