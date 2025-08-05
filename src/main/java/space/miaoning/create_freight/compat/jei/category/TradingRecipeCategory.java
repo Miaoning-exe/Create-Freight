@@ -19,6 +19,7 @@ import space.miaoning.create_freight.CreateFreight;
 import space.miaoning.create_freight.recipe.TradingRecipe;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("removal")
 @ParametersAreNonnullByDefault
@@ -83,12 +84,15 @@ public class TradingRecipeCategory extends AbstractRecipeCategory<TradingRecipe>
                     : Component.translatable("jei.create_freight.trading_post.unlimited"));
         }
         if (isCursorInsideBounds(25, 24, 16, 16, mouseX, mouseY)) {
-            String regions = String.join(", ", pRecipe.getRegionWeights().keySet());
-            tooltip.add(Component.translatable("jei.create_freight.trading_post.regions",
-                        regions.isEmpty() ? "-" : regions));
+            String regionText = pRecipe.getRegionWeights().keySet().stream()
+                    .map(region -> {
+                        String key = "jei.create_freight.trading_recipe." + region;
+                        String localized = Component.translatable(key).getString();
+                        return localized.equals(key) ? region : localized;
+                    })
+                    .collect(Collectors.joining(", "));
+            tooltip.add(Component.translatable("jei.create_freight.trading_post.regions", regionText));
         }
-
-
     }
 
     private static boolean isCursorInsideBounds(int iconX, int iconY, int iconWidth, int iconHeight, double cursorX, double cursorY) {

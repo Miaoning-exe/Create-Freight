@@ -6,10 +6,17 @@
   "gui.create_freight.automatic_trader.shopping_list_filter": "Shopping List Filter",
   "info.create_freight.no_valid_stock_ticker": "Automatic Trader must be placed near a valid Stock Ticker to run!",
   "itemGroup.create_freight.main": "Create Freight",
+
   "jei.create_freight.trading_post": "Trading Post",
   "jei.create_freight.trading_post.limit": "Trade Limit: %s",
   "jei.create_freight.trading_post.unlimited": "Unlimited Trade Limit",
   "jei.create_freight.trading_post.regions": "Regions: %s",
+  "jei.create_freight.trading_recipe.desert": "Desert",
+  "jei.create_freight.trading_recipe.jungle": "Jungle",
+  "jei.create_freight.trading_recipe.ocean": "Ocean",
+  "jei.create_freight.trading_recipe.plain": "Plain",
+  "jei.create_freight.trading_recipe.snowy_plain": "Snowy Plain",
+  "jei.create_freight.trading_recipe.taiga": "Taiga",
 
   "item.create_freight.cash": "Cash"
 }
