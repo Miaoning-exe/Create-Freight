@@ -2,17 +2,6 @@
   "replace": false,
   "values": [
     "minecraft:plains",
-    "minecraft:sunflower_plains",
-    "biomesoplenty:field",
-    "biomesoplenty:floodplain",
-    "biomesoplenty:forested_field",
-    "biomesoplenty:grassland",
-    "biomesoplenty:lavender_field",
-    "biomesoplenty:lush_savanna",
-    "biomesoplenty:orchard",
-    "biomesoplenty:pasture",
-    "biomesoplenty:prairie",
-    "biomesoplenty:pumpkin_patch",
-    "biomesoplenty:volcanic_plains"
+    "minecraft:sunflower_plains"
   ]
 }

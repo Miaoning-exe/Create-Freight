@@ -1,11 +1,6 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:is_taiga",
-    "biomesoplenty:coniferous_forest",
-    "biomesoplenty:fir_clearing",
-    "biomesoplenty:redwood_forest",
-    "biomesoplenty:snowy_coniferous_forest",
-    "biomesoplenty:snowy_fir_clearing"
+    "#minecraft:is_taiga"
   ]
 }

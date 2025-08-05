@@ -1,9 +1,6 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:is_ocean",
-    "biomesoplenty:dune_beach",
-    "biomesoplenty:gravel_beach",
-    "biomesoplenty:tropics"
+    "#minecraft:is_ocean"
   ]
 }

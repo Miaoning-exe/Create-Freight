@@ -1,11 +1,6 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:is_jungle",
-    "biomesoplenty:fungal_jungle",
-    "biomesoplenty:overgrown_greens",
-    "biomesoplenty:rainforest",
-    "biomesoplenty:rocky_rainforest",
-    "biomesoplenty:undergrowth"
+    "#minecraft:is_jungle"
   ]
 }
