@@ -2,8 +2,6 @@ package space.miaoning.create_freight.structure;
 
 import com.mojang.serialization.Codec;
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.Create;
-import com.simibubi.create.content.logistics.packagerLink.LogisticsNetwork;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +12,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import space.miaoning.create_freight.CFStructureProcessors;
+import space.miaoning.create_freight.util.NetworkHelper;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -43,17 +42,10 @@ public class FreqProcessor extends StructureProcessor {
         BlockState state = blockInfoGlobal.state();
         if (AllBlocks.STOCK_TICKER.has(state) || AllBlocks.STOCK_LINK.has(state)) {
             UUID freqId = getFreqIdForPos(jigsawPieceBottomCenterPos);
+            NetworkHelper.initServerNetwork(freqId);
 
             CompoundTag nbt = blockInfoGlobal.nbt() != null ? blockInfoGlobal.nbt().copy() : new CompoundTag();
             nbt.putUUID("Freq", freqId);
-
-            LogisticsNetwork network = Create.LOGISTICS.logisticsNetworks
-                    .computeIfAbsent(freqId, $ -> new LogisticsNetwork(freqId));
-            if (network.owner == null) {
-                network.owner = new UUID(0, 0);
-                network.locked = true;
-                Create.LOGISTICS.markDirty();
-            }
 
             return new StructureTemplate.StructureBlockInfo(
                     blockInfoGlobal.pos(),
