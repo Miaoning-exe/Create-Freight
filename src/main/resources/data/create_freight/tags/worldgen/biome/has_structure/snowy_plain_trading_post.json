@@ -1,6 +1,7 @@
-  {
+{
   "replace": false,
   "values": [
-    "minecraft:snowy_plains"
+    "minecraft:snowy_plains",
+    "biomesoplenty:tundra"
   ]
 }
