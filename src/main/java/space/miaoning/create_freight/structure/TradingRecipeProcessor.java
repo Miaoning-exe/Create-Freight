@@ -10,7 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
@@ -21,114 +21,113 @@ import space.miaoning.create_freight.recipe.TradingRecipe;
 import space.miaoning.create_freight.util.NetworkHelper;
 import space.miaoning.create_freight.util.TradingRecipeHelper;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class TradingRecipeProcessor extends StructureProcessor {
-
-    public static final Codec<TradingRecipeProcessor> CODEC = RecordCodecBuilder.create(instance -> instance
-            .group(
-                    Codec.STRING.fieldOf("region").forGetter(processor -> processor.regionName),
-                    Codec.INT.fieldOf("recipe_amount").forGetter(processor -> processor.recipeAmount)
-            )
-            .apply(instance, TradingRecipeProcessor::new)
+    public static final Codec<TradingRecipeProcessor> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    Codec.STRING.fieldOf("region").forGetter(processor -> processor.regionName)
+            ).apply(instance, TradingRecipeProcessor::new)
     );
 
     private final String regionName;
-    private final int recipeAmount;
 
-    private static final Map<BlockPos, List<TradingRecipe>> structureTradings = new HashMap<>();
-    private static final Map<BlockPos, Integer> usedTradingCount = new HashMap<>();
-    private static final Map<BlockPos, BlockPos> stockTickerPositions = new HashMap<>();
-
-    public TradingRecipeProcessor(String regionName, int recipeAmount) {
+    public TradingRecipeProcessor(String regionName) {
         this.regionName = regionName;
-        this.recipeAmount = recipeAmount;
     }
 
     @Override
-    public StructureTemplate.StructureBlockInfo process(LevelReader level,
-                                                        BlockPos jigsawPiecePos,
-                                                        BlockPos jigsawPieceBottomCenterPos,
-                                                        StructureTemplate.StructureBlockInfo blockInfoLocal,
-                                                        StructureTemplate.StructureBlockInfo blockInfoGlobal,
-                                                        StructurePlaceSettings settings,
-                                                        @Nullable StructureTemplate template) {
+    public List<StructureTemplate.StructureBlockInfo> finalizeProcessing(ServerLevelAccessor pServerLevel,
+                                                                         BlockPos pOffset,
+                                                                         BlockPos pPos,
+                                                                         List<StructureTemplate.StructureBlockInfo> pOriginalBlockInfos,
+                                                                         List<StructureTemplate.StructureBlockInfo> pProcessedBlockInfos,
+                                                                         StructurePlaceSettings pSettings) {
 
-        if (!structureTradings.containsKey(jigsawPieceBottomCenterPos)) {
-            List<TradingRecipe> recipes = TradingRecipeHelper.getRandomTradingRecipes(regionName, recipeAmount);
-            structureTradings.put(jigsawPieceBottomCenterPos, recipes);
-            usedTradingCount.put(jigsawPieceBottomCenterPos, 0);
-        }
-        List<TradingRecipe> availableRecipes = structureTradings.get(jigsawPieceBottomCenterPos);
+        BlockPos stockTickerPos = null;
+        BlockInfoWithIndex serverStoreInfo = null;
+        List<BlockInfoWithIndex> tableClothInfos = new ArrayList<>();
 
-        if (blockInfoGlobal.nbt() == null || availableRecipes.isEmpty()) {
-            return blockInfoGlobal;
-        }
-
-        if (CFBlocks.SERVER_STORE.has(blockInfoGlobal.state())) {
-            CompoundTag nbt = blockInfoGlobal.nbt().copy();
-
-            ListTag presetItems = new ListTag();
-            for (TradingRecipe recipe : availableRecipes) {
-                BigItemStack sellItem = new BigItemStack(
-                        recipe.getSell().copyWithCount(1),
-                        recipe.getLimit() > 0 ? recipe.getSell().getCount() * recipe.getLimit() : BigItemStack.INF
-                );
-                if (sellItem.count > 0) {
-                    presetItems.add(sellItem.write());
-                }
+        for (int i = 0; i < pProcessedBlockInfos.size(); i++) {
+            StructureTemplate.StructureBlockInfo info = pProcessedBlockInfos.get(i);
+            if (info.nbt() == null) {
+                continue;
             }
-            nbt.put("PresetItems", presetItems);
+            if (AllBlocks.STOCK_TICKER.has(info.state())) {
+                stockTickerPos = info.pos();
+            } else if (CFBlocks.SERVER_STORE.has(info.state())) {
+                serverStoreInfo = new BlockInfoWithIndex(info, i);
+            } else if (AllBlocks.TABLE_CLOTHS.contains(info.state().getBlock())) {
+                tableClothInfos.add(new BlockInfoWithIndex(info, i));
+            }
+        }
 
-            return new StructureTemplate.StructureBlockInfo(
-                    blockInfoGlobal.pos(),
-                    blockInfoGlobal.state(),
-                    nbt
+        if (stockTickerPos == null || serverStoreInfo == null || tableClothInfos.isEmpty()) {
+            return pProcessedBlockInfos;
+        }
+
+        // 生成交易配方
+        List<TradingRecipe> recipes = TradingRecipeHelper.getRandomTradingRecipes(
+                regionName, tableClothInfos.size(), pSettings.getRandom(serverStoreInfo.info().pos()));
+
+        // 设置服务器商店预设物品
+        CompoundTag serverStoreNbt = Objects.requireNonNull(serverStoreInfo.info().nbt()).copy();
+        setServerStoreNbt(serverStoreNbt, recipes);
+
+        pProcessedBlockInfos.set(serverStoreInfo.index(), new StructureTemplate.StructureBlockInfo(
+                serverStoreInfo.info().pos(),
+                serverStoreInfo.info().state(),
+                serverStoreNbt
+        ));
+
+        // 为每个桌布分配交易
+        for (int i = 0; i < recipes.size(); i++) {
+            BlockInfoWithIndex tableClothInfo = tableClothInfos.get(i);
+
+            CompoundTag nbt = Objects.requireNonNull(tableClothInfo.info().nbt()).copy();
+            setRecipeNbt(
+                    nbt,
+                    pServerLevel.getLevel().dimensionType().effectsLocation().toString(),
+                    stockTickerPos.subtract(tableClothInfo.info().pos()),
+                    recipes.get(i)
             );
-        }
 
-        if (!stockTickerPositions.containsKey(jigsawPieceBottomCenterPos)) {
-            if (AllBlocks.STOCK_TICKER.has(blockInfoGlobal.state()))
-                stockTickerPositions.put(jigsawPieceBottomCenterPos, blockInfoGlobal.pos());
-            return blockInfoGlobal;
-        }
-
-        if (AllBlocks.TABLE_CLOTHS.contains(blockInfoGlobal.state().getBlock())) {
-            // 为桌布分配交易
-            int usedCount = usedTradingCount.get(jigsawPieceBottomCenterPos);
-            TradingRecipe selectedRecipe = availableRecipes.get(usedCount % availableRecipes.size());
-            usedTradingCount.put(jigsawPieceBottomCenterPos, usedCount + 1);
-
-            // 设置桌布的交易信息
-            CompoundTag nbt = blockInfoGlobal.nbt().copy();
-
-            // 设置基本属性
-            nbt.putUUID("OwnerUUID", NetworkHelper.SERVER_ID);
-            nbt.putString("TargetDim", level.dimensionType().effectsLocation().toString());
-            BlockPos stockTickerPos = stockTickerPositions.get(jigsawPieceBottomCenterPos);
-            BlockPos offset = stockTickerPos.subtract(blockInfoGlobal.pos());
-            nbt.put("TargetOffset", NbtUtils.writeBlockPos(offset));
-            nbt.putByte("Valid", (byte) 1);
-
-            setRecipeNbt(nbt, selectedRecipe);
-
-            return new StructureTemplate.StructureBlockInfo(
-                    blockInfoGlobal.pos(),
-                    blockInfoGlobal.state(),
+            pProcessedBlockInfos.set(tableClothInfo.index(), new StructureTemplate.StructureBlockInfo(
+                    tableClothInfo.info().pos(),
+                    tableClothInfo.info().state(),
                     nbt
-            );
+            ));
         }
 
-        return blockInfoGlobal;
+        return pProcessedBlockInfos;
     }
 
-    private static void setRecipeNbt(CompoundTag nbt, TradingRecipe recipe) {
+    private static void setServerStoreNbt(CompoundTag nbt, List<TradingRecipe> recipes) {
+        ListTag presetItems = new ListTag();
+        for (TradingRecipe recipe : recipes) {
+            BigItemStack sellItem = new BigItemStack(
+                    recipe.getSell().copyWithCount(1),
+                    recipe.getLimit() > 0 ? recipe.getSell().getCount() * recipe.getLimit() : BigItemStack.INF
+            );
+            if (sellItem.count > 0) {
+                presetItems.add(sellItem.write());
+            }
+        }
+        nbt.put("PresetItems", presetItems);
+    }
+
+    private static void setRecipeNbt(CompoundTag nbt, String dim, BlockPos offset, TradingRecipe recipe) {
+        // 设置基本属性
+        nbt.putUUID("OwnerUUID", NetworkHelper.SERVER_ID);
+        nbt.putString("TargetDim", dim);
+        nbt.put("TargetOffset", NbtUtils.writeBlockPos(offset));
+        nbt.putBoolean("Valid", true);
+
         // 设置cost
         ItemStack cost = recipe.getCost();
         nbt.put("Filter", cost.copyWithCount(1).serializeNBT());
@@ -156,5 +155,8 @@ public class TradingRecipeProcessor extends StructureProcessor {
     @Override
     protected StructureProcessorType<?> getType() {
         return CFStructureProcessors.TRADING_RECIPE_PROCESSOR.get();
+    }
+
+    public record BlockInfoWithIndex(StructureTemplate.StructureBlockInfo info, int index) {
     }
 }

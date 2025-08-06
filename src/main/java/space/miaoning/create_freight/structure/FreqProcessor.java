@@ -5,7 +5,8 @@ import com.simibubi.create.AllBlocks;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
@@ -14,8 +15,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import space.miaoning.create_freight.CFStructureProcessors;
 import space.miaoning.create_freight.util.NetworkHelper;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 import java.util.UUID;
 
 @MethodsReturnNonnullByDefault
@@ -23,38 +24,32 @@ import java.util.UUID;
 public class FreqProcessor extends StructureProcessor {
     public static final Codec<FreqProcessor> CODEC = Codec.unit(FreqProcessor::new);
 
-    private static UUID getFreqIdForPos(BlockPos pos) {
-        long x = pos.getX() * 0x9E3779B97F4A7C15L;
-        long y = pos.getY() * 0x85EBCA6BL;
-        long z = pos.getZ() * 0xC2B2AE3DL;
-        return new UUID(x ^ y, z ^ x);
-    }
-
     @Override
-    public StructureTemplate.StructureBlockInfo process(LevelReader level,
-                                                        BlockPos jigsawPiecePos,
-                                                        BlockPos jigsawPieceBottomCenterPos,
-                                                        StructureTemplate.StructureBlockInfo blockInfoLocal,
-                                                        StructureTemplate.StructureBlockInfo blockInfoGlobal,
-                                                        StructurePlaceSettings settings,
-                                                        @Nullable StructureTemplate template) {
+    public List<StructureTemplate.StructureBlockInfo> finalizeProcessing(ServerLevelAccessor pServerLevel,
+                                                                         BlockPos pOffset,
+                                                                         BlockPos pPos,
+                                                                         List<StructureTemplate.StructureBlockInfo> pOriginalBlockInfos,
+                                                                         List<StructureTemplate.StructureBlockInfo> pProcessedBlockInfos,
+                                                                         StructurePlaceSettings pSettings) {
 
-        BlockState state = blockInfoGlobal.state();
-        if (AllBlocks.STOCK_TICKER.has(state) || AllBlocks.STOCK_LINK.has(state)) {
-            UUID freqId = getFreqIdForPos(jigsawPieceBottomCenterPos);
-            NetworkHelper.initServerNetwork(freqId);
+        RandomSource random = pSettings.getRandom(pPos);
+        UUID freqId = new UUID(random.nextLong(), random.nextLong());
+        NetworkHelper.initServerNetwork(freqId);
+        for (int i = 0; i < pProcessedBlockInfos.size(); i++) {
+            StructureTemplate.StructureBlockInfo blockInfo = pProcessedBlockInfos.get(i);
+            BlockState state = blockInfo.state();
+            if (AllBlocks.STOCK_TICKER.has(state) || AllBlocks.STOCK_LINK.has(state)) {
+                CompoundTag nbt = blockInfo.nbt() != null ? blockInfo.nbt().copy() : new CompoundTag();
+                nbt.putUUID("Freq", freqId);
 
-            CompoundTag nbt = blockInfoGlobal.nbt() != null ? blockInfoGlobal.nbt().copy() : new CompoundTag();
-            nbt.putUUID("Freq", freqId);
-
-            return new StructureTemplate.StructureBlockInfo(
-                    blockInfoGlobal.pos(),
-                    state,
-                    nbt
-            );
+                pProcessedBlockInfos.set(i, new StructureTemplate.StructureBlockInfo(
+                        blockInfo.pos(),
+                        state,
+                        nbt
+                ));
+            }
         }
-
-        return blockInfoGlobal;
+        return pProcessedBlockInfos;
     }
 
     @Override

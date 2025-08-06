@@ -16,8 +16,6 @@ public class CFCreativeTabs {
 
     public static final List<ItemProviderEntry<?>> ITEMS = List.of(
             CFBlocks.AUTOMATIC_TRADER,
-//            CFBlocks.CARGO_STATION,
-            CFBlocks.SERVER_STORE,
             CFItems.CASH
     );
 
@@ -31,5 +29,4 @@ public class CFCreativeTabs {
     public static void register(IEventBus modEventBus) {
         CREATIVE_MODE_TABS.register(modEventBus);
     }
-
 }
