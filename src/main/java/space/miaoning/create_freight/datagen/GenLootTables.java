@@ -13,8 +13,7 @@ public class GenLootTables extends LootTableProvider {
 
     public GenLootTables(PackOutput pOutput) {
         super(pOutput, Set.of(), List.of(
-                new SubProviderEntry(GenChestLootTables::new, LootContextParamSets.CHEST),  // 生成宝箱战利品
-                new SubProviderEntry(::new, LootContextParamSets.BLOCK)   // 生成方块战利品
+                new SubProviderEntry(GenChestLootTables::new, LootContextParamSets.CHEST) // 生成宝箱战利品
         ));
     }
 }
