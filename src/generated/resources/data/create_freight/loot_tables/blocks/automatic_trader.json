@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "create_freight:automatic_trader"
+          "name": "minecraft:automatic_trader"
         }
       ],
       "rolls": 1.0

@@ -1,6 +1,22 @@
 {
   "replace": false,
   "values": [
-    "minecraft:desert"
+    "minecraft:desert",
+    {
+      "id": "biomesoplenty:dryland",
+      "required": false
+    },
+    {
+      "id": "biomesoplenty:lush_desert",
+      "required": false
+    },
+    {
+      "id": "biomesoplenty:wasteland",
+      "required": false
+    },
+    {
+      "id": "biomesoplenty:wasteland_steppe",
+      "required": false
+    }
   ]
 }

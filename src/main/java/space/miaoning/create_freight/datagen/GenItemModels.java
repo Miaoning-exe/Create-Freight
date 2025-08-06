@@ -8,6 +8,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import space.miaoning.create_freight.CreateFreight;
 
+@SuppressWarnings("removal")
 public class GenItemModels extends ItemModelProvider {
     public GenItemModels(PackOutput output, ExistingFileHelper existingFileHelper) {
         super(output, CreateFreight.MODID, existingFileHelper);

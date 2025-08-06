@@ -1,6 +1,26 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:is_jungle"
+    "#minecraft:is_jungle",
+    {
+      "id": "biomesoplenty:fungal_jungle",
+      "required": false
+    },
+    {
+      "id": "biomesoplenty:overgrown_greens",
+      "required": false
+    },
+    {
+      "id": "biomesoplenty:rainforest",
+      "required": false
+    },
+    {
+      "id": "biomesoplenty:rocky_rainforest",
+      "required": false
+    },
+    {
+      "id": "biomesoplenty:floodplain",
+      "required": false
+    }
   ]
 }

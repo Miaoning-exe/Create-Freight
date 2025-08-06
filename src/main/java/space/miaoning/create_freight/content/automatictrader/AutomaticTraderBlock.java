@@ -5,6 +5,8 @@ import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -22,6 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import space.miaoning.create_freight.CFBlockEntityTypes;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -78,6 +81,22 @@ public class AutomaticTraderBlock extends HorizontalDirectionalBlock implements 
         }
 
         return InteractionResult.PASS;
+    }
+
+    // 处理内容物掉落
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (level.isClientSide || state.getBlock() == newState.getBlock()) {
+            return;
+        }
+
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+
+        if (blockEntity instanceof AutomaticTraderBlockEntity trader) {
+            Containers.dropContents(level, pos, trader);
+        }
+
+        super.onRemove(state, level, pos, newState, isMoving);
     }
 
     @Override
