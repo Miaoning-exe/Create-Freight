@@ -3,7 +3,6 @@ package space.miaoning.create_freight.datagen.loot_table;
 import com.github.talrey.createdeco.ItemRegistry;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
-import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlock;
 import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -37,15 +36,15 @@ public class GenChestLootTables implements LootTableSubProvider {
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(10, 25)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Copper").get())
-                    .setWeight(20)
-                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(5, 25)))
+                    .setWeight(10)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(5, 15)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Iron").get())
-                    .setWeight(10)
-                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 4)))
+                    .setWeight(5)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 3)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Gold").get())
-                    .setWeight(3)
+                    .setWeight(2)
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 1)))
             );
 

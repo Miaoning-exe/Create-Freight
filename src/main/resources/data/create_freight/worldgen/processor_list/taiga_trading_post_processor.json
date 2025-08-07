@@ -5,8 +5,7 @@
         },
         {
             "processor_type": "create_freight:trading_recipe_processor",
-            "region": "taiga",
-            "recipe_amount": 2
+            "region": "taiga"
         }
     ]
 }
