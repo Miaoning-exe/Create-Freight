@@ -10,11 +10,10 @@ import space.miaoning.create_freight.CreateFreight;
 public class CFRecipeTypes {
     public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(ForgeRegistries.RECIPE_TYPES, CreateFreight.MODID);
 
-    public static final RegistryObject<RecipeType<TradingRecipe>> TRADING_POST = RECIPE_TYPES.register("trading_post",()->registerRecipeType("trading_post"));
+    public static final RegistryObject<RecipeType<TradingRecipe>> TRADING_POST = RECIPE_TYPES.register("trading_post", () -> registerRecipeType("trading_post"));
 
     public static <T extends Recipe<?>> RecipeType<T> registerRecipeType(final String identifier) {
-        return new RecipeType<>()
-        {
+        return new RecipeType<>() {
             public String toString() {
                 return CreateFreight.MODID + ":" + identifier;
             }

@@ -23,7 +23,7 @@ import java.util.List;
 @Mixin(PackagerBlockEntity.class)
 public class PackagerBlockEntityMixin {
 
-    @Inject(method = "attemptToSend", at = @At("HEAD"), cancellable = true ,remap = false)
+    @Inject(method = "attemptToSend", at = @At("HEAD"), cancellable = true, remap = false)
     private void onAttemptToSend(List<PackagingRequest> queuedRequests, CallbackInfo ci) {
         PackagerBlockEntity self = (PackagerBlockEntity) (Object) this;
         Level level = self.getLevel();

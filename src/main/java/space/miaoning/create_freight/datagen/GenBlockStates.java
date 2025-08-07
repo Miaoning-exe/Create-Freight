@@ -2,7 +2,6 @@ package space.miaoning.create_freight.datagen;
 
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import space.miaoning.create_freight.CFBlocks;
@@ -21,6 +20,6 @@ public class GenBlockStates extends BlockStateProvider {
     }
 
     private void simpleBlockWithItem(Block block) {
-        simpleBlockWithItem(block,cubeAll(block));
+        simpleBlockWithItem(block, cubeAll(block));
     }
 }

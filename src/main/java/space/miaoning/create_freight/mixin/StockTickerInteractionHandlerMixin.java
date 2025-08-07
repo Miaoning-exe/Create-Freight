@@ -29,10 +29,9 @@ public class StockTickerInteractionHandlerMixin {
     private static void redirectForEach(List<ItemStack> toTransfer, Consumer<ItemStack> action,
                                         Player player, Level level, BlockPos targetPos, ItemStack mainHandItem) {
 
-        if (level.getBlockEntity(targetPos) instanceof StockTickerBlockEntity tickerBE
-                && NetworkHelper.isServerNetwork(tickerBE.behaviour.freqId)) {
+        if (level.getBlockEntity(targetPos) instanceof StockTickerBlockEntity tickerBE &&
+                NetworkHelper.isServerNetwork(tickerBE.behaviour.freqId))
             return;
-        }
         toTransfer.forEach(action);
     }
 }

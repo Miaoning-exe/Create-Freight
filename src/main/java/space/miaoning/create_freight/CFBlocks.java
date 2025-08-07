@@ -1,21 +1,14 @@
 package space.miaoning.create_freight;
 
 import com.simibubi.create.AllTags;
-import com.simibubi.create.foundation.data.AssetLookup;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.data.SharedProperties;
 import com.tterrag.registrate.util.entry.BlockEntry;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import space.miaoning.create_freight.content.automatictrader.AutomaticTraderBlock;
 import space.miaoning.create_freight.content.serverstore.ServerStoreBlock;
 
-import static com.simibubi.create.foundation.data.ModelGen.customItemModel;
 import static com.simibubi.create.foundation.data.TagGen.pickaxeOnly;
-
 
 public class CFBlocks {
     private static final CreateRegistrate REGISTRATE = CreateFreight.getRegistrate();
@@ -33,11 +26,6 @@ public class CFBlocks {
             .simpleItem()
             .register();
 
-//    public static final BlockEntry<Block> CARGO_STATION = REGISTRATE.block("cargo_station", Block::new)
-//            .initialProperties(SharedProperties::stone)
-//            .simpleItem()
-//            .register();
-
     public static final BlockEntry<ServerStoreBlock> SERVER_STORE = REGISTRATE
             .block("server_store", ServerStoreBlock::new)
             .initialProperties(SharedProperties::stone)
@@ -50,6 +38,4 @@ public class CFBlocks {
 
     public static void register() {
     }
-
 }
-

@@ -1,8 +1,6 @@
 package space.miaoning.create_freight.datagen.recipe;
 
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.world.item.Items;
-import space.miaoning.create_freight.datagen.builder.TradingRecipeBuilder;
 
 import java.util.function.Consumer;
 
