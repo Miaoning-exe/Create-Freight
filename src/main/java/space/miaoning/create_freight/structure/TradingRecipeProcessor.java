@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -72,8 +73,9 @@ public class TradingRecipeProcessor extends StructureProcessor {
         }
 
         // 生成交易配方
+        ServerLevel level = pServerLevel.getLevel();
         List<TradingRecipe> recipes = TradingRecipeHelper.getRandomTradingRecipes(
-                regionName, tableClothInfos.size(), pSettings.getRandom(serverStoreInfo.info().pos()));
+                level, regionName, tableClothInfos.size(), pSettings.getRandom(serverStoreInfo.info().pos()));
 
         // 设置服务器商店预设物品
         CompoundTag serverStoreNbt = Objects.requireNonNull(serverStoreInfo.info().nbt()).copy();
@@ -94,7 +96,7 @@ public class TradingRecipeProcessor extends StructureProcessor {
                     : new CompoundTag();
             setRecipeNbt(
                     nbt,
-                    pServerLevel.getLevel().dimensionType().effectsLocation().toString(),
+                    level.dimensionType().effectsLocation().toString(),
                     stockTickerPos.subtract(tableClothInfo.info().pos()),
                     recipes.get(i)
             );
@@ -114,6 +116,7 @@ public class TradingRecipeProcessor extends StructureProcessor {
                                    List<BlockInfoWithIndex> tableClothInfos) {
 
         nbt.putString("Region", regionName);
+        nbt.putString("LastUpdateDate", "");
 
         ListTag presetItems = new ListTag();
         for (TradingRecipe recipe : recipes) {
@@ -146,6 +149,7 @@ public class TradingRecipeProcessor extends StructureProcessor {
         ItemStack cost = recipe.getCost();
         nbt.put("Filter", cost.copyWithCount(1).serializeNBT());
         nbt.putInt("FilterAmount", cost.getCount());
+        nbt.putBoolean("UpTo", true);
 
         // 设置sell
         CompoundTag encodedRequest = new CompoundTag();
