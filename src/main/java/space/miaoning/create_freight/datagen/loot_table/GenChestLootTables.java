@@ -32,11 +32,11 @@ public class GenChestLootTables implements LootTableSubProvider {
             .setBonusRolls(ConstantValue.exactly(2))
 
             .add(LootItem.lootTableItem(CFItems.CASH)
-                    .setWeight(20)
-                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(10, 25)))
+                    .setWeight(50)
+                    .apply(SetItemCountFunction.setCount(UniformGenerator.between(10, 30)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Copper").get())
-                    .setWeight(10)
+                    .setWeight(50)
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(5, 15)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Iron").get())
@@ -44,7 +44,7 @@ public class GenChestLootTables implements LootTableSubProvider {
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 3)))
             )
             .add(LootItem.lootTableItem(ItemRegistry.COINS.get("Gold").get())
-                    .setWeight(2)
+                    .setWeight(1)
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(0, 1)))
             );
 
