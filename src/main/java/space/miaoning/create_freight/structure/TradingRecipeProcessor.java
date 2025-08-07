@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.logistics.BigItemStack;
+import com.simibubi.create.content.logistics.tableCloth.TableClothBlock;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -55,14 +56,13 @@ public class TradingRecipeProcessor extends StructureProcessor {
 
         for (int i = 0; i < pProcessedBlockInfos.size(); i++) {
             StructureTemplate.StructureBlockInfo info = pProcessedBlockInfos.get(i);
-            if (info.nbt() == null) {
-                continue;
-            }
             if (AllBlocks.STOCK_TICKER.has(info.state())) {
                 stockTickerPos = info.pos();
-            } else if (CFBlocks.SERVER_STORE.has(info.state())) {
+            } else if (CFBlocks.SERVER_STORE.has(info.state()) &&
+                    info.nbt() != null) {
                 serverStoreInfo = new BlockInfoWithIndex(info, i);
-            } else if (AllBlocks.TABLE_CLOTHS.contains(info.state().getBlock())) {
+            } else if (AllBlocks.TABLE_CLOTHS.contains(info.state().getBlock()) &&
+                    info.state().getValue(TableClothBlock.HAS_BE)) {
                 tableClothInfos.add(new BlockInfoWithIndex(info, i));
             }
         }
@@ -77,7 +77,7 @@ public class TradingRecipeProcessor extends StructureProcessor {
 
         // 设置服务器商店预设物品
         CompoundTag serverStoreNbt = Objects.requireNonNull(serverStoreInfo.info().nbt()).copy();
-        setServerStoreNbt(serverStoreNbt, recipes);
+        setServerStoreNbt(serverStoreNbt, recipes, tableClothInfos);
 
         pProcessedBlockInfos.set(serverStoreInfo.index(), new StructureTemplate.StructureBlockInfo(
                 serverStoreInfo.info().pos(),
@@ -89,7 +89,9 @@ public class TradingRecipeProcessor extends StructureProcessor {
         for (int i = 0; i < recipes.size(); i++) {
             BlockInfoWithIndex tableClothInfo = tableClothInfos.get(i);
 
-            CompoundTag nbt = Objects.requireNonNull(tableClothInfo.info().nbt()).copy();
+            CompoundTag nbt = tableClothInfo.info().nbt() != null
+                    ? tableClothInfo.info().nbt().copy()
+                    : new CompoundTag();
             setRecipeNbt(
                     nbt,
                     pServerLevel.getLevel().dimensionType().effectsLocation().toString(),
@@ -107,7 +109,12 @@ public class TradingRecipeProcessor extends StructureProcessor {
         return pProcessedBlockInfos;
     }
 
-    private static void setServerStoreNbt(CompoundTag nbt, List<TradingRecipe> recipes) {
+    private void setServerStoreNbt(CompoundTag nbt,
+                                   List<TradingRecipe> recipes,
+                                   List<BlockInfoWithIndex> tableClothInfos) {
+
+        nbt.putString("Region", regionName);
+
         ListTag presetItems = new ListTag();
         for (TradingRecipe recipe : recipes) {
             BigItemStack sellItem = new BigItemStack(
@@ -119,6 +126,13 @@ public class TradingRecipeProcessor extends StructureProcessor {
             }
         }
         nbt.put("PresetItems", presetItems);
+
+        ListTag tableClothPositions = new ListTag();
+        for (BlockInfoWithIndex tableClothInfo : tableClothInfos) {
+            BlockPos pos = tableClothInfo.info().pos();
+            tableClothPositions.add(NbtUtils.writeBlockPos(pos));
+        }
+        nbt.put("TableClothPositions", tableClothPositions);
     }
 
     private static void setRecipeNbt(CompoundTag nbt, String dim, BlockPos offset, TradingRecipe recipe) {
