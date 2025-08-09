@@ -45,6 +45,7 @@ public class CreateFreight {
 
         // 注册配置文件
         context.registerConfig(ModConfig.Type.SERVER, TradingConfig.SPEC, "create_freight-server.toml");
+        testCron.testCronUtils();
     }
 
     public static CreateRegistrate getRegistrate() {
