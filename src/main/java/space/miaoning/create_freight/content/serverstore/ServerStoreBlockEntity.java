@@ -2,9 +2,13 @@ package space.miaoning.create_freight.content.serverstore;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.logistics.BigItemStack;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.content.logistics.tableCloth.TableClothBlock;
+import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -15,6 +19,8 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,10 +28,14 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
-import org.jetbrains.annotations.Nullable;
+import space.miaoning.create_freight.config.TradingConfig;
+import space.miaoning.create_freight.recipe.TradingRecipe;
+import space.miaoning.create_freight.util.TradingRecipeHelper;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +46,12 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
     private final ServerStoreItemHandler itemHandler;
     private final LazyOptional<IItemHandler> lazyItemHandler;
 
-    private final List<BigItemStack> presetItems = new ArrayList<>();
     private String regionName = "";
-    private String lastUpdateDate = "";
-    private final List<BigItemStack> virtualInventory = new ArrayList<>();
+    private @Nullable ZonedDateTime lastRefreshTime;
+    private @Nullable ZonedDateTime lastRestockTime;
     private final List<BlockPos> tableClothPositions = new ArrayList<>();
+    private final List<BigItemStack> presetItems = new ArrayList<>();
+    private final List<BigItemStack> virtualInventory = new ArrayList<>();
 
     public ServerStoreBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -55,16 +66,68 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
     @Override
     public void lazyTick() {
         if (level != null && !level.isClientSide()) {
-            String currentDate = LocalDate.now().toString();
-
-            if (!lastUpdateDate.equals(currentDate)) {
-                lastUpdateDate = currentDate;
-                updateVirtualInventory();
-            }
             if (tableClothPositions.isEmpty()) {
                 searchTableClothPositions();
             }
+            if (TradingConfig.tradingRefreshChecker.shouldExecute(lastRefreshTime)) {
+                refreshRecipes();
+            }
+            if (TradingConfig.tradingRestockChecker.shouldExecute(lastRestockTime)) {
+                updateVirtualInventory();
+            }
         }
+    }
+
+    public void refreshRecipes() {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+
+        List<TradingRecipe> recipes = TradingRecipeHelper.getRandomTradingRecipes(
+                level, regionName, tableClothPositions.size(), RandomSource.create());
+
+        // 设置服务器商店预设物品
+        presetItems.clear();
+        for (TradingRecipe recipe : recipes) {
+            BigItemStack sellItem = new BigItemStack(
+                    recipe.getSell().copyWithCount(1),
+                    recipe.getLimit() > 0 ? recipe.getSell().getCount() * recipe.getLimit() : BigItemStack.INF
+            );
+            if (sellItem.count > 0) {
+                presetItems.add(sellItem);
+            }
+        }
+        setChanged();
+
+        // 为每个桌布分配交易
+        for (int i = 0; i < tableClothPositions.size(); i++) {
+            BlockPos pos = tableClothPositions.get(i);
+            if (!(level.getBlockEntity(pos) instanceof TableClothBlockEntity tcBE)) {
+                continue;
+            }
+            if (i >= recipes.size()) {
+                tcBE.requestData.isValid = false;
+            } else {
+                TradingRecipe recipe = recipes.get(i);
+
+                ItemStack cost = recipe.getCost();
+                FilteringBehaviour behaviour = tcBE.getBehaviour(FilteringBehaviour.TYPE);
+                behaviour.setFilter(cost.copyWithCount(1));
+                behaviour.count = cost.getCount();
+
+                ItemStack sell = recipe.getSell();
+                BigItemStack sellStack = new BigItemStack(sell.copyWithCount(1), sell.getCount());
+                tcBE.requestData.isValid = true;
+                tcBE.requestData.encodedRequest = new PackageOrderWithCrafts(
+                        new PackageOrder(List.of(sellStack)),
+                        List.of()
+                );
+            }
+            tcBE.setChanged();
+        }
+
+        lastRefreshTime = ZonedDateTime.now();
+        lastRestockTime = null;
     }
 
     private void updateVirtualInventory() {
@@ -76,6 +139,8 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
                 virtualInventory.add(newStack);
             }
             setChanged();
+
+            lastRestockTime = ZonedDateTime.now();
         }
     }
 
@@ -108,7 +173,16 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
     protected void read(CompoundTag tag, boolean clientPacket) {
         super.read(tag, clientPacket);
         regionName = tag.getString("Region");
-        lastUpdateDate = tag.getString("LastUpdateDate");
+        try {
+            lastRefreshTime = ZonedDateTime.parse(tag.getString("LastRefreshTime"));
+        } catch (DateTimeParseException e) {
+            lastRefreshTime = null;
+        }
+        try {
+            lastRestockTime = ZonedDateTime.parse(tag.getString("LastRestockTime"));
+        } catch (DateTimeParseException e) {
+            lastRestockTime = null;
+        }
 
         presetItems.clear();
         if (tag.contains("PresetItems")) {
@@ -190,7 +264,8 @@ public class ServerStoreBlockEntity extends SmartBlockEntity {
     protected void write(CompoundTag tag, boolean clientPacket) {
         super.write(tag, clientPacket);
         tag.putString("Region", regionName);
-        tag.putString("LastUpdateDate", lastUpdateDate);
+        tag.putString("LastRefreshTime", lastRefreshTime != null ? lastRefreshTime.toString() : "");
+        tag.putString("LastRestockTime", lastRestockTime != null ? lastRestockTime.toString() : "");
 
         ListTag presetTag = new ListTag();
         for (BigItemStack stack : presetItems) {

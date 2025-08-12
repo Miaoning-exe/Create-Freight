@@ -4,7 +4,7 @@
             "processor_type": "create_freight:freq_processor"
         },
         {
-            "processor_type": "create_freight:trading_recipe_processor",
+            "processor_type": "create_freight:trading_post_processor",
             "region": "ocean"
         }
     ]

@@ -79,7 +79,7 @@ public class AutomaticTraderBlockEntity extends SmartBlockEntity implements Cont
 
     public AutomaticTraderBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        setLazyTickRate(20);
+        setLazyTickRate(30);
     }
 
     @Override
